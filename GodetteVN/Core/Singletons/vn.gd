@@ -56,8 +56,8 @@ var auto_bound:int = -1 # Initialize to -1. Will get changed in fileRelated.
 # Formula ((-1)*auto_speed + 3.25)*20
 
 # Default CPS
-var cps : float = 50.0 # either 50 or 25
-var cps_map:Dictionary = {'fast':50, 'slow':25, 'instant':0, 'slower':10}
+var cps : float = 36.0
+var cps_map:Dictionary = {'fast':50.0, 'normal':cps, 'slow':25.0, 'instant':0.0, 'slower':10.0}
 
 # ---------------------------- Dvar Varibles ----------------------------
 

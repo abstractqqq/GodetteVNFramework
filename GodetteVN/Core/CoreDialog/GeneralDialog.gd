@@ -120,6 +120,7 @@ func interpret_events(event):
 	if debug_mode: print("Debug :" + str(ev))
 	
 	# Pre-parse, keep this at minimum
+	if ev.has('expr'): ev['expression'] = ev['expr']
 	if ev.has('loc'): ev['loc'] = _parse_loc(ev['loc'], ev)
 	if ev.has('params'): ev['params'] = vn.Utils.read(ev['params'])
 	if ev.has('color'): ev['color'] = _parse_color(ev['color'], ev)
@@ -193,6 +194,13 @@ func get_all_dialog_blocks():
 		
 func start_scene(blocks : Dictionary, choices: Dictionary, conditions: Dictionary,\
 	load_instr:String = "new_game", start_block:String="starter", start_id=null) -> void:
+	# blocks: A dictionary, with keys being names for your dialogs, and values being
+	# an array of events.
+	# choices: A dictionary, with keys being the name for this choice, and values being
+	# an array of options corresponding to this choice
+	# conditions: A dictionary, with keys being the name for this condition, and values
+	# being any type of boolean expression that can be evaludated by the system. 
+	
 	vn.Scene = self
 	get_tree().set_auto_accept_quit(false)
 	vn.Pgs.currentSaveDesc = scene_description
@@ -221,11 +229,9 @@ func start_scene(blocks : Dictionary, choices: Dictionary, conditions: Dictionar
 	else:
 		push_error("Unknow loading instruction")
 	
-	if music.bgm != '':
-		_cur_bgm = music.bgm
+	if music.bgm != '': _cur_bgm = music.bgm
 	if debug_mode: print("Debug: current block is " + vn.Pgs.currentBlock)
 	load_event_at_index(current_index)
-
 
 func auto_load_next(forw:bool=true):
 	if forw:
@@ -263,7 +269,7 @@ func set_center(ev: Dictionary):
 		set_nvl({'nvl': true,'font':ev['font']}, false)
 	else:
 		set_nvl({'nvl': true}, false)
-	var w = _u._has_or_default(ev,"who","")
+	var w = _u.has_or_default(ev,"who","")
 	if ev.has('speed'):
 		say(w, ev['center'], ev['speed'])
 	else:
@@ -292,6 +298,8 @@ func speech_parse(ev : Dictionary) -> void:
 	if ev.has('speed'):
 		if (vn.cps_map.has(ev['speed'])):
 			say(combine, ev[combine],vn.cps_map[ev['speed']] )
+		elif ev['speed'].is_valid_float():
+			say(combine, ev[combine],float(ev['speed']))
 		else:
 			print("!!! Unknown speed value in " + str(ev))
 			push_error("Unknown speed value.")
@@ -354,10 +362,10 @@ func generate_choices(ev: Dictionary):
 		
 	choiceContainer.visible = true # make it visible now
 	
-func say(combine : String, words : String, cps = 50, ques:bool = false) -> void:
+func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false) -> void:
 	var uid:String = express(combine, false, true)
 	words = preprocess(words)
-	if vn.skipping: cps = 0
+	if vn.skipping: cps = 0.0
 	if self.nvl: # little awkward. But stable for now.
 		if just_loaded:
 			just_loaded = false
@@ -425,15 +433,17 @@ func extend(ev:Dictionary):
 		if ev.has('ext'): ext = 'ext'
 
 		var words:String = preprocess(ev[ext])
-		var cps:float = 50.0
+		var cps:float = vn.cps
 		if ev.has('speed'):
 			if (vn.cps_map.has(ev['speed'])):
 				cps = vn.cps_map[ev['speed']]
+			elif ev['speed'].is_valid_float():
+				cps = float(ev['speed'])
 		
 		_voice_to_hist(_check_latest_voice(ev) and vn.voice_to_history, prev_speaker, words)
 		if just_loaded:
 			just_loaded = false
-			dialogbox.set_dialog(vn.Pgs.playback_events['speech'], 50)
+			dialogbox.set_dialog(vn.Pgs.playback_events['speech'], vn.cps)
 			vn.Pgs.history.pop_back()
 		else:
 			dialogbox.bbcode_text = vn.Pgs.playback_events['speech']
@@ -460,7 +470,6 @@ func wait_for_accept(ques:bool = false):
 		else: # The yield has been nullified, that means some outside code is trying to change dialog blocks
 			# back to default
 			_nullify_prev_yield = false
-
 
 #------------------------ Related to Music and Sound ---------------------------
 func play_bgm(ev : Dictionary, auto_forw=true) -> void:
@@ -490,7 +499,7 @@ func play_bgm(ev : Dictionary, auto_forw=true) -> void:
 		else:
 			push_error('Expecting a fadeout field with time as its value.')
 	# Now we're sure it's either play bgm or fadein bgm
-	var vol:float = _u._has_or_default(ev,'vol',0.0)
+	var vol:float = _u.has_or_default(ev,'vol',0.0)
 	_cur_bgm = path
 	music.bgm = path
 	var music_path:String = vn.BGM_DIR + path
@@ -509,7 +518,7 @@ func play_bgm(ev : Dictionary, auto_forw=true) -> void:
 		push_error('Expecting a fadein field with time as its value.')
 	
 func play_sound(ev :Dictionary) -> void:
-	music.play_sound(vn.AUDIO_DIR+ev['audio'], _u._has_or_default(ev, "vol", 0))
+	music.play_sound(vn.AUDIO_DIR+ev['audio'], _u.has_or_default(ev, "vol", 0))
 	auto_load_next()
 	
 func voice(path:String, auto_forw:bool = true) -> void:
@@ -524,7 +533,7 @@ func change_background(ev : Dictionary, auto_forw=true) -> void:
 		bg.bg_change(path)
 	else: # size > 1
 		var eff_name:String=""
-		for k in ev.keys():
+		for k in ev:
 			if k in vn.TRANSITIONS:
 				eff_name = k
 				break
@@ -532,7 +541,8 @@ func change_background(ev : Dictionary, auto_forw=true) -> void:
 			print("!!! Unknown transition at " + str(ev))
 			push_error("Unknown transition type given in bg change event.")
 		var eff_dur:float = float(ev[eff_name])/2 # transition effect total duration / 2
-		var color:Color = _u._has_or_default(ev, 'color', Color.black)
+		var color:Color = _u.has_or_default(ev, 'color', Color.black)
+		clear_boxes()
 		screen.screen_transition("full",eff_name,color,eff_dur,path)
 		yield(screen, "transition_finished")
 	
@@ -667,8 +677,8 @@ func screen_effects(ev: Dictionary, auto_forw=true):
 		_:
 			if temp.size()==2 and not vn.skipping:
 				var mode:String = temp[1]
-				var c:Color = _u._has_or_default(ev, "color", Color.black)
-				var t:float = _u._has_or_default(ev,"time",1.0)
+				var c:Color = _u.has_or_default(ev, "color", Color.black)
+				var t:float = _u.has_or_default(ev,"time",1.0)
 				if ef in vn.TRANSITIONS:
 					if mode == "out": # this might be a bit counter-intuitive
 						# but we have to stick with this
@@ -682,15 +692,15 @@ func screen_effects(ev: Dictionary, auto_forw=true):
 	auto_load_next(!vn.inLoading and auto_forw)
 
 func flashlight(ev:Dictionary):
-	screen.flashlight(_u._has_or_default(ev, 'scale', Vector2(1,1)))
+	screen.flashlight(_u.has_or_default(ev, 'scale', Vector2(1,1)))
 	vn.Pgs.playback_events['screen'] = ev
 
 func tint(ev : Dictionary) -> void:
 	if ev.has('color'):
 		if ev['screen'] == 'tintwave':
-			screen.tintWave(ev['color'], _u._has_or_default(ev,'time',1.0))
+			screen.tintWave(ev['color'], _u.has_or_default(ev,'time',1.0))
 		elif ev['screen'] == 'tint':
-			screen.tint(ev['color'], _u._has_or_default(ev,'time',1.0))
+			screen.tint(ev['color'], _u.has_or_default(ev,'time',1.0))
 			# When saving to playback, no need to replay the fadein effect
 			ev['time'] = 0.05
 		vn.Pgs.playback_events['screen'] = ev
@@ -726,12 +736,12 @@ func camera_effect(ev : Dictionary) -> void:
 		"zoom":
 			QM.reset_skip()
 			if ev.has('scale'):
-				var type:String = _u._has_or_default(ev,'type','linear')
+				var type:String = _u.has_or_default(ev,'type','linear')
 				if type == 'instant' or vn.skipping:
-					camera.zoom(ev['scale'], _u._has_or_default(ev,'loc',Vector2(0,0)))
+					camera.zoom(ev['scale'], _u.has_or_default(ev,'loc',Vector2(0,0)))
 				else:
-					camera.zoom_timed(ev['scale'], _u._has_or_default(ev,'time',1), type,\
-						_u._has_or_default(ev,'loc',Vector2(0,0)))
+					camera.zoom_timed(ev['scale'], _u.has_or_default(ev,'time',1), type,\
+						_u.has_or_default(ev,'loc',Vector2(0,0)))
 				vn.Pgs.playback_events['camera'] = {'zoom':camera.target_zoom, 'offset':camera.target_offset,\
 				'deg':camera.target_degree}
 			else:
@@ -739,8 +749,8 @@ func camera_effect(ev : Dictionary) -> void:
 				push_error('Camera zoom expects a scale.')
 		"move":
 			QM.reset_skip()
-			var time:float = _u._has_or_default(ev, 'time', 1)
-			var type:String = _u._has_or_default(ev, 'type', 'linear')
+			var time:float = _u.has_or_default(ev, 'time', 1)
+			var type:String = _u.has_or_default(ev, 'type', 'linear')
 			if ev.has('loc'):
 				if vn.skipping or type == "instant": time = 0
 				camera.camera_move(ev['loc'], time, type)
@@ -750,18 +760,18 @@ func camera_effect(ev : Dictionary) -> void:
 				push_error("Camera move expects a loc and time, and type (optional)")
 		"shake":
 			if not vn.skipping: # min shake time is 0.5, default 2.0
-				camera.shake(_u._has_or_default(ev,'amount',250), max(_u._has_or_default(ev,'time',2.0),0.5))
+				camera.shake(_u.has_or_default(ev,'amount',250), max(_u.has_or_default(ev,'time',2.0),0.5))
 		"spin":
 			if ev.has('deg'):
-				var type:String = _u._has_or_default(ev,'type','linear')
-				var sdir:int = _u._has_or_default(ev,'sdir', 1)
+				var type:String = _u.has_or_default(ev,'type','linear')
+				var sdir:int = _u.has_or_default(ev,'sdir', 1)
 				if vn.skipping or type == "instant":
 					camera.rotation_degrees += (sdir*ev['deg'])
 					camera.target_degree = camera.rotation_degrees
 					vn.Pgs.playback_events['camera'] = {'zoom':camera.target_zoom, 'offset':camera.target_offset,\
 					'deg':camera.target_degree}
 				else:
-					camera.camera_spin(sdir,ev['deg'], _u._has_or_default(ev,'time',1.0), type)
+					camera.camera_spin(sdir,ev['deg'], _u.has_or_default(ev,'time',1.0), type)
 					vn.Pgs.playback_events['camera'] = {'zoom':camera.target_zoom, 'offset':camera.target_offset,\
 					 'deg':camera.target_degree}
 				
@@ -822,10 +832,10 @@ func express(combine : String, auto_forw:bool = true, ret_uid:bool = false):
 #--------------------------------- Weather -------------------------------------
 func change_weather(we:String, auto_forw = true):
 	if !vn.inLoading:
+		screen.show_weather(we) # If given weather doesn't exist, nothing will happen
 		if we in ["", "off"]:
 			vn.Pgs.playback_events.erase('weather')
 		else:
-			screen.show_weather(we) # If given weather doesn't exist, nothing will happen
 			vn.Pgs.playback_events['weather'] = {'weather':we}
 		auto_load_next(auto_forw)
 
@@ -900,8 +910,8 @@ func sideImageChange(ev:Dictionary, auto_forw:bool = true):
 	else:
 		sideImage.texture = load(vn.SIDE_IMAGE+path)
 		vn.Pgs.playback_events['side'] = ev
-		stage.set_sideImage(_u._has_or_default(ev,'scale',Vector2(1,1)),\
-			_u._has_or_default(ev,'loc',Vector2(-35, 530)))
+		stage.set_sideImage(_u.has_or_default(ev,'scale',Vector2(1,1)),\
+			_u.has_or_default(ev,'loc',Vector2(-35, 530)))
 	auto_load_next(auto_forw)
 
 func check_dialog():
@@ -935,6 +945,10 @@ func generate_nullify():
 func clear_boxes():
 	speaker.bbcode_text = ''
 	dialogbox.bbcode_text = ''
+	#if dialogbox.eod:
+	#	dialogbox.timer.stop()
+	#	dialogbox.bbcode_text = ''
+	#	dialogbox.eod = false
 
 func wait(time : float) -> void:
 	if just_loaded: just_loaded = false
@@ -1065,7 +1079,7 @@ func split_equation(line:String):
 	for i in line.length():
 		var le:String = line[i]
 		if le != " ":
-			var is_symbol:bool = _u._has_or_default({'>':true,'<':true, '=':true
+			var is_symbol:bool = _u.has_or_default({'>':true,'<':true, '=':true
 					,'!':true, '+':true, '-':true, '*':true, '/':true},le,false)
 			if is_symbol:
 				presymbol = false
@@ -1080,13 +1094,13 @@ func split_equation(line:String):
 func flt_text(ev: Dictionary) -> void:
 	var wt:float = ev['wait']
 	ev['float'] = vn.Utils.MarkUp(ev['float'])
-	var loc:Vector2 = _u._has_or_default(ev,'loc', Vector2(600,300))
-	var in_t:float = _u._has_or_default(ev, 'fadein', 1)
+	var loc:Vector2 = _u.has_or_default(ev,'loc', Vector2(600,300))
+	var in_t:float = _u.has_or_default(ev, 'fadein', 1)
 	var f:Node = load(float_text).instance()
 	if ev.has('font') and ev['font'] != "" and ev['font'] != "default":
 		f.set_font(vn.ROOT_DIR+ev['font'])
 	if ev.has('dir'):
-		f.set_movement(ev['dir'], _u._has_or_default(ev,'speed', 30))
+		f.set_movement(ev['dir'], _u.has_or_default(ev,'speed', 30))
 	add_child(f)
 	if ev.has('time') and ev['time'] > wt:
 		f.display(ev['float'], ev['time'], in_t, loc)
@@ -1095,7 +1109,7 @@ func flt_text(ev: Dictionary) -> void:
 	
 	var has_voice:bool = _check_latest_voice(ev)
 	if ev.has('hist') and (_parse_true_false(ev['hist'])):
-		_voice_to_hist((has_voice and vn.voice_to_history), _u._has_or_default(ev,'who',''), ev['float'] )
+		_voice_to_hist((has_voice and vn.voice_to_history), _u.has_or_default(ev,'who',''), ev['float'] )
 	wait(wt)
 
 func nvl_off():
@@ -1183,7 +1197,7 @@ func _hide_namebox(uid:String):
 	
 # checks if the dict has something, if so, return the value of the field. Else return the
 # given default val
-#func _has_or_default(ev:Dictionary, fname:String , default):
+#func has_or_default(ev:Dictionary, fname:String , default):
 #	if ev.has(fname): return ev[fname]
 #	else: return default
 

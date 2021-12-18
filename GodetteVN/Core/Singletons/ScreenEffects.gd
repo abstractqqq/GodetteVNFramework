@@ -35,7 +35,6 @@ func show_weather(w_name:String):
 	var w:Node = get_node("weather")
 	if all_weathers.has(w_name):
 		w.add_child(load(all_weathers[w_name]).instance())
-	else: print('Warning: weather not found. Nothing is done.')
 
 func removeLasting():
 	for n in $lasting.get_children():

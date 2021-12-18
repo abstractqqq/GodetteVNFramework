@@ -12,7 +12,6 @@ func _ready():
 		stage_character(ch)
 	for ch in $RegisteredCharacters.spriteless_characters:
 		spriteless_character(ch)
-		
 	# Maybe free, maybe not free?
 	$RegisteredCharacters.queue_free()
 

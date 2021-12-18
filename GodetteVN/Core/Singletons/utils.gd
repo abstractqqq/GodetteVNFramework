@@ -48,6 +48,6 @@ func _run_job(t:Timer, n:Node, m:String, params:Array):
 		n.callv(m, params)
 #------------------------------------------------------------
 # Dictionary manipulation
-func _has_or_default(ev:Dictionary, fname:String , default):
+func has_or_default(ev:Dictionary, fname:String , default):
 	if ev.has(fname): return ev[fname]
 	else: return default

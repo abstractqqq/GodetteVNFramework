@@ -1,29 +1,31 @@
 # GodetteVN, A Visual Novel Framework for Godot Users
 
-## Refactoring almost done. Getting ready to push out more related content.
+## No major change planned before Godot 4, which means there won't be any major change probably in the next year or so.
 
 ## Goal and Vision: Bringing the theatrical experience into your story, right in the Godot Engine.
 
-### Highlights: (subject to change...)
+### Highlights and Goals: (subject to change...)
 
-1. Actor Editor: any 2d customization doable in Godot should be applicable to actors. (In progress...)
-2. Script Editor: script should be similar to that of a play in the traditional setting, but formatted in a more programmatic language. (In progress...)
+1. Actor Editor: any 2d customization doable in Godot should be applicable to actors. (Usable...)
+2. Script Editor: script should be similar to that of a play in the traditional setting, but formatted in a more programmatic language. (Usable, not the simplest...)
 3. Rich template libraries for "commonly" used components, e.g. timed choices, parallax, weather, etc. (In progress...) 
-4. Key components should be callable programmatically and should be functional without others. (Not started yet...)
-5. Strong unit testing support, instantenous display for the event in your script. (Not started yet...)
+4. Key components should be callable programmatically and should be functional without others. (Almost?...)
+5. Strong unit testing support, instantenous display for the event in your script. (Started, but secretly wants to 
+postpone this after Godot 4...)
 6. Light Weight (Godot engine + the framework is < 100mb.). Not including export templates, which is only needed when exporting the game. 
-7. Much easier to code any other game outside of VNs.
-8. UI interface for UI editing.
+7. **Much easier to code any other game outside of VNs.**
+8. **UI interface for UI editing.**
 
 ### Dehightlights: (Not necessarily...)
-1. Well, overly flashy effects will be left to the user, unless very commonly used.
-2. You probably need to learn shaders and more stuff to do make image effects.
-3. You will have to learn Godot along the way if you want to step outside Visual Novels in your game.
+1. You probably need to learn shaders and more stuff to do make image effects.
+2. You will have to learn Godot along the way if you want to step outside Visual Novels in your game.
+3. There will always be things you want to do but the framework doesn't neccesarily support. (whichatever editor you use)
 
 ### Future Plans:
 1. Side Picture correspondence. (Already has everything needed. Just need to create an interface.)
 2. Simplify the whole process.
-3. More builtin templates. (Like a customizable phone screen template, liteDialogNode, etc.)
+3. More builtin templates. (Like a customizable phone screen template, liteDialog (for rpg), LiveDialog, etc.)
+4. Lip sync.
 
 -------------------------------------------------------------------------------------------------------------
 
@@ -49,7 +51,7 @@ There are 3 core components in this framework.
 Transition system is integrated from eh-jogos's project. You can find it [here](https://github.com/eh-jogos/eh_Transitions)
 
 Shaders are taken from Godot Asset Library, [here](https://godotengine.org/asset-library/asset/122) and
- [here](https://godotshaders.com/shader/glitch-effect-shader/) @arlez80. Not all shaders are implemented yet.
+[here](https://godotshaders.com/shader/glitch-effect-shader/) @arlez80. Not all shaders are implemented yet.
 
 Video Showcases (Possibly outdated):
 
@@ -63,8 +65,8 @@ Other examples like timed choice, investigation scene, can be found in the folde
 
 Projects done with this template:
 
-[My O2A2 entry](https://tqqq.itch.io/o2a2-elegy-of-a-songbird)
-[Remake of the above](https://youtu.be/BArw1Qwrz10)
+[Songbird](https://tqqq.itch.io/o2a2-elegy-to-a-songbird)
+[Video of the game](https://youtu.be/BArw1Qwrz10)
 
 More in the making ~
 

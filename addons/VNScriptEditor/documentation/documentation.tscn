@@ -290,10 +290,7 @@ Explained in the condition section.
 
 5. Path 
 path :: /abc.tscn;
-means the path res://abc.tscn
-
-
-"
+means the path res://abc.tscn"
 selection_enabled = true
 __meta__ = {
 "_edit_use_anchors_": false
@@ -441,7 +438,7 @@ chara:: * join; loc:: *; expression :: (default);
 Character * will join at loc with given expression.
 
 chara:: * fadein; loc :: *; time :: (1);  expression :: (default);
-Character * will fadein at loc in given time with given expression.
+Character * will fadein at loc in given time with given expression. Expression keyword can be replaced by expr.
 
 chara:: * leave;
 Here * can be 'all' to make all character leave the stage. Use 'absolute_all' to remove all characters including those with in_all=False.

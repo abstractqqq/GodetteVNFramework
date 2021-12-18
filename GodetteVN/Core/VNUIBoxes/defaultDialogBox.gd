@@ -1,19 +1,20 @@
-extends ColorRect
+extends ColorRect # or TextureRect
 
-var draggable = false
-var resizable = false
+var draggable:bool = false
+var resizable:bool = false
 
-var _following = false
-var _resizing = false
-var _drag_start_pos = Vector2()
-var _resize_start_pos = Vector2()
+var _following:bool = false
+var _resizing:bool = false
+var _drag_start_pos:Vector2 = Vector2()
+var _resize_start_pos:Vector2 = Vector2()
 
 var ratio = Vector2()
 
 func _ready():
 	ratio.x = get_node('dialogBoxCore').rect_size.x / self.rect_size.x
 	ratio.y = get_node('dialogBoxCore').rect_size.y / self.rect_size.y
-
+	if not resizable:
+		$resizeHandler.queue_free()
 
 func _on_dialogBox_mouse_entered():
 	if draggable:
@@ -31,8 +32,8 @@ func _on_dialogBox_gui_input(event):
 
 func _process(_delta):
 	if _resizing:
-		var mouse_pos = get_global_mouse_position()
-		var diff = mouse_pos - _resize_start_pos
+		var mouse_pos:Vector2 = get_global_mouse_position()
+		var diff:Vector2 = mouse_pos - _resize_start_pos
 		diff.y = -diff.y
 		rect_size += diff
 		rect_position.y = mouse_pos.y

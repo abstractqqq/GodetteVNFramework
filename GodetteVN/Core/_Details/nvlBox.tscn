@@ -28,4 +28,7 @@ __meta__ = {
 
 [node name="Timer" type="Timer" parent="."]
 
+[node name="Tween" type="Tween" parent="."]
+
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
+[connection signal="tween_completed" from="Tween" to="." method="_on_Tween_tween_completed"]

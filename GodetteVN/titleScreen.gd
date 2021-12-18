@@ -4,7 +4,7 @@ extends CanvasLayer
 func _ready():
 	get_tree().set_auto_accept_quit(true)
 	OS.set_window_maximized(true)
-	
+
 func _on_exitButton_pressed():
 	vn.Files.write_to_config()
 	get_tree().quit()
@@ -18,4 +18,3 @@ func _on_newGameButton_pressed():
 
 func _on_loadButton_pressed():
 	add_child(load(vn.LOAD_PATH).instance())
-
