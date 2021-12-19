@@ -25,7 +25,7 @@ func _ready():
 	$autoBox/autoSpeed.add_item('Slow')
 	$autoBox/autoSpeed.add_item('Normal')
 	$autoBox/autoSpeed.add_item('Fast')
-	$autoBox/autoSpeed.select(vn.Files.system_data['auto_speed'])
+	$autoBox/autoSpeed.select(vn.Files.system_data['auto_time'])
 	
 func _on_volumeSlider_value_changed(value):
 	vn.Files.system_data['bgm_volume'] = value
@@ -55,8 +55,8 @@ func _on_voiceSlider_value_changed(value):
 		AudioServer.set_bus_mute(3,false)
 
 func _on_autoSpeed_item_selected(index):
-	vn.Files.system_data['auto_speed'] = index
-	vn.auto_bound = ((-1)*index + 3.25)*20
+	vn.Files.system_data['auto_time'] = index
+	vn.auto_time = 3 - index # 
 
 func _exit_tree():
 	vn.Files.write_to_config()

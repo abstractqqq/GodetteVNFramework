@@ -11,7 +11,6 @@ onready var timer = $Timer
 var autoCounter:int = 0
 var skipCounter:int = 0
 var adding:bool = false
-var nw:bool = false
 
 var _target_leng:int = 0
 
@@ -23,11 +22,12 @@ var FONTS:Dictionary = {}
 const ft:PoolStringArray = PoolStringArray(['normal', 'bold', 'italics', 'bold_italics'])
 
 signal load_next
+signal all_visible
 
 func _ready():
 	for f in ft:
 		FONTS[f] = get('custom_fonts/%s_font'%f)
-		
+	
 	var sb:VScrollBar = get_v_scroll()
 	var _err:int = vn.get_node("GlobalTimer").connect("timeout",self, "_on_global_timeout")
 	_err = sb.connect("mouse_entered", vn.Utils, "no_mouse")
@@ -46,6 +46,7 @@ func set_chara_fonts(ev:Dictionary):
 func set_dialog(words : String, cps:float = vn.cps, extend = false):
 	# words will be already preprocessed
 	#eod = false
+	$Tween.remove(self,"visible_characters")
 	if extend:
 		visible_characters = self.text.length()
 		bbcode_text += " " +words
@@ -58,9 +59,6 @@ func set_dialog(words : String, cps:float = vn.cps, extend = false):
 	if cps <= 0:
 		visible_characters = _target_leng
 		adding = false
-		if nw:
-			nw = false
-			emit_signal("load_next")
 		return
 	
 	$Tween.interpolate_property(self,'visible_characters',visible_characters,\
@@ -72,11 +70,8 @@ func force_finish():
 	$Tween.remove(self,"visible_characters")
 	visible_characters = _target_leng
 	adding = false
-	if nw:
-		nw = false
-		if not vn.skipping:
-			emit_signal("load_next")
-			
+	emit_signal("all_visible")
+
 func _on_Tween_tween_completed(object, key):
 	if key == ":visible_characters" and object == self:
 		force_finish()
@@ -125,13 +120,11 @@ func _on_global_timeout():
 		if skipCounter == 1:
 			emit_signal("load_next")
 	else:
-		# Auto forwarding
-		if not adding and vn.auto_on: 
+		if not adding and vn.auto_on and not MyUtils.has_job('auto_dialog_wait'): 
 			autoCounter += 1
-			if autoCounter >= vn.auto_bound:
+			if autoCounter >= vn.auto_time * 20:
 				autoCounter = 0
-				if not nw:
-					emit_signal("load_next")
+				emit_signal("load_next")
 		else:
 			autoCounter = 0
 		skipCounter = 0

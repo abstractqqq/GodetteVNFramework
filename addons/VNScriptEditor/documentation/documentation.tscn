@@ -200,7 +200,6 @@ Any Godot builtin bbcode.
 [nl]: new line. If you're using GDscript to write events, not this editor, you can also use \"\\n\".
 [dc]: double colon. (Same. No need in GDscript.)
 [sm]: semicolon. (Same. No need in GDscript.)
-[nw]: autoforward to next dialog without delay
 [lb]: the left square bracket \"[\" (Same. No need in GDscript.)
 [rb]: the right square bracket \"]\" (Same. No need in GDscript.)
 [dvar_identifer]: puts the value of the dvar in the text
@@ -438,7 +437,7 @@ chara:: * join; loc:: *; expression :: (default);
 Character * will join at loc with given expression.
 
 chara:: * fadein; loc :: *; time :: (1);  expression :: (default);
-Character * will fadein at loc in given time with given expression. Expression keyword can be replaced by expr.
+Character * will fadein at loc in given time with given expression.
 
 chara:: * leave;
 Here * can be 'all' to make all character leave the stage. Use 'absolute_all' to remove all characters including those with in_all=False.

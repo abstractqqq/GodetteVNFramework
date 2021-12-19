@@ -12,6 +12,7 @@ __meta__ = {
 
 [node name="sideImage" type="Sprite" parent="other"]
 position = Vector2( -35, 530 )
+z_index = 1
 centered = false
 
 [node name="characters" type="Node" parent="."]

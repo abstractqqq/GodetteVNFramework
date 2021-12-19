@@ -14,7 +14,7 @@ var main_block = [
 	{"dvar":'mo += 50*2-mo'},
 	{'screen':'pixelate in'},
 	{'call': 'simple_print', 'params':['test ', 123]},
-	{"vo": "This is vo talking."},
+	{"vo": "This is vo talking.", 'wait':2},
 	{"bg": "condo.jpg", 'diagonal':2, 'color':Color.blueviolet},
 	{"vo": "If you haven't noticed, I am a character without a namebox. You can set this "+\
 	"attribute for any talking characters in characterManager.gd."},
@@ -62,7 +62,7 @@ var main_block = [
 	{"female":"Ok, let me show you how to put an image on the side."},
 	{'side':'female_smile.png'},
 	{'female':'Lastly, I want show you how to use centered text!'},
-	{'center':"Center text can be called like this", "who":'female','font':'/fonts/ARegular.tres'},
+	{'center':"Center text can be called like this", "who":'female','font':'/fonts/ARegular.tres', 'wait':2},
 	{"female":"Notice that although my name is not displayed in the centered text, in history," +\
 	" my name is still displayed."},
 	{"female":"This is because it looks visually awkward to display a name for a centered text."},

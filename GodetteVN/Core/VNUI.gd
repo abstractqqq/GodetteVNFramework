@@ -18,12 +18,11 @@ func free_QM():
 
 func get_dialog_box():
 	return dbox
-	
 
 func namebox_follow_chara(uid:String):
 	if name_box_follow_chara and stage.is_on_stage(uid):
-		var cpos = stage.get_chara_pos(uid)
-		var mid = get_viewport().size.x / 2.0
+		var cpos:Vector2 = stage.get_chara_pos(uid)
+		var mid:float = get_viewport().size.x / 2.0
 		if cpos.x < mid:
 			$nameBox.rect_position.x = $dialogBox.rect_position.x
 		else:

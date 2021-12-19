@@ -4,19 +4,19 @@ var system_data = {}
 const CONFIG_PATH = "user://config.json"
 const image_exts = ['png', 'jpg', 'jpeg']
 const _default_config_vars = {'bgm_volume':0, 'eff_volume':0,\
- 'voice_volume':0,'auto_speed':1}
+ 'voice_volume':0,'auto_time':2}
 
 func _ready():
 	load_config()
 #------------------------------------------------------------------------------
 func get_save_files():
-	var files = []
-	var dir = Directory.new()
+	var files:Array = []
+	var dir:Directory = Directory.new()
 	if !dir.dir_exists(vn.SAVE_DIR):
-		dir.make_dir_recursive(vn.SAVE_DIR)
+		var _e:int = dir.make_dir_recursive(vn.SAVE_DIR)
 	
-	dir.open(vn.SAVE_DIR)
-	dir.list_dir_begin()
+	var _e:int = dir.open(vn.SAVE_DIR)
+	_e = dir.list_dir_begin()
 	var file:String = "1"
 	while file != "":
 		file = dir.get_next()
@@ -29,19 +29,17 @@ func get_save_files():
 
 func data2Thumbnail(img_data:PoolByteArray) -> ImageTexture:
 	
-	var img = Image.new()
+	var img:Image = Image.new()
 	img.create_from_data(vn.THUMBNAIL_WIDTH, vn.THUMBNAIL_HEIGHT,\
-	false, vn.ThumbnailFormat, img_data)
+		false, vn.ThumbnailFormat, img_data)
 	# Creates a texture according to the imageTexture data
-	var texture = ImageTexture.new()
+	var texture:ImageTexture = ImageTexture.new()
 	texture.create_from_image(img)
 	return texture
 	
 func readSave(save) -> bool:
-	var success = false
-	var file = File.new()
-	var error = file.open_encrypted_with_pass(save.path, File.READ, vn.PASSWORD)
-	if error == OK:
+	var file:File = File.new()
+	if file.open_encrypted_with_pass(save.path, File.READ, vn.PASSWORD) == OK:
 		var data = file.get_var()
 		vn.Pgs.currentSaveDesc = data['currentSaveDesc']
 		vn.Pgs.currentIndex = data['currentIndex']
@@ -55,13 +53,12 @@ func readSave(save) -> bool:
 		vn.Chs.chara_name_patch = data['name_patches']
 		vn.Chs.patch_display_names()
 		vn.dvar = data['dvar']
-		success = true
 		file.close()
 	else:
 		# load save failed. The save is corrupted or removed.
-		push_error(error)
+		push_error("Load save failed. Save file: %s" %save.path)
 	
-	return success
+	return true
 
 #-------------------------------------------------------------------------------
 func get_chara_sprites(uid, which = "sprite"):
@@ -78,18 +75,18 @@ func get_chara_sprites(uid, which = "sprite"):
 		which = vn.CHARA_DIR
 		
 	if !dir.dir_exists(which):
-		dir.make_dir_recursive(which)
+		var _e : int = dir.make_dir_recursive(which)
 	
-	dir.open(which)
-	dir.list_dir_begin()
+	var _e : int = dir.open(which)
+	_e = dir.list_dir_begin()
 	var pic:String = "1"
 	while pic != "":
 		pic = dir.get_next()
 		if not pic.begins_with("."):
-			var temp = pic.split(".")
-			var ext = temp[temp.size()-1]
+			var temp:PoolStringArray = pic.split(".")
+			var ext:String = temp[temp.size()-1]
 			if ext in image_exts:
-				var pic_id = (temp[0].split("_"))[0]
+				var pic_id:String = (temp[0].split("_"))[0]
 				if pic_id == uid:
 					sprites.append(pic)
 				
@@ -100,39 +97,38 @@ func get_backgrounds():
 	# This method should only be used in development phase.
 	# The exported project won't work with dir calls depending on
 	# what kind of paths are passed.
-	var bgs = []
-	var dir = Directory.new()
+	var bgs:Array = []
+	var dir:Directory = Directory.new()
 	if !dir.dir_exists(vn.BG_DIR):
-		dir.make_dir_recursive(vn.BG_DIR)
+		var _e:int = dir.make_dir_recursive(vn.BG_DIR)
 	
-	dir.open(vn.BG_DIR)
-	dir.list_dir_begin()
+	var _e:int = dir.open(vn.BG_DIR)
+	_e = dir.list_dir_begin()
 	var pic:String = "1"
 	while pic != "":
 		pic = dir.get_next()
 		if not pic.begins_with("."):
-			var temp = pic.split(".")
-			var ext = temp[temp.size()-1]
+			var temp:PoolStringArray = pic.split(".")
+			var ext:String = temp[temp.size()-1]
 			if ext in image_exts:
 				bgs.append(pic)
 				
 	dir.list_dir_end()
 	return bgs
 
-
 #-------------------------------------------------------------------------------
-func path_valid(path : String) -> bool:
-	# This method should only be used in development phase.
-	# Path checks might not work because of 
-	# the way paths are encoded.
-	var file = File.new()
-	var exists = file.file_exists(path)
-	file.close()
-	return exists
+#func path_valid(path : String) -> bool:
+#	# This method should only be used in development phase.
+#	# Path checks might not work because of 
+#	# the way paths are encoded.
+#	var file = File.new()
+#	var exists = file.file_exists(path)
+#	file.close()
+#	return exists
 #------------------------ Loading Json -------------------------------
 
 func load_json(path: String):
-	var f = File.new()
+	var f:File = File.new()
 	if f.open(path, File.READ) == OK:
 		var t = JSON.parse(f.get_as_text()).get_result()
 		f.close()
@@ -175,7 +171,7 @@ func load_config():
 	AudioServer.set_bus_volume_db(1, system_data["bgm_volume"])
 	AudioServer.set_bus_volume_db(2, system_data["eff_volume"])
 	AudioServer.set_bus_volume_db(3, system_data["voice_volume"])
-	vn.auto_bound = (7 - (system_data['auto_speed'] + 1) * 2) * 20
+	vn.auto_time = system_data['auto_time']
 
 func make_spoilerproof(scene_path:String, all_dialog_blocks):
 	if system_data.has(scene_path) == false:

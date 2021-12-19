@@ -9,8 +9,6 @@ script = ExtResource( 4 )
 dialog_json = "res://VNScript/test2.json"
 debug_mode = true
 scene_description = "Introduction to System 1"
-choice_bar = "res://GodetteVN/Core/ChoiceBar/choiceBar.tscn"
-float_text = "res://GodetteVN/Core/_Details/floatText.tscn"
 
 [node name="background" parent="." instance=ExtResource( 2 )]
 

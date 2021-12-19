@@ -5,8 +5,9 @@ export(String, FILE, "*.json") var dialog_json
 export(bool) var debug_mode
 export(String) var scene_description
 
-export(String, FILE, "*.tscn") var choice_bar = ''
-export(String, FILE, "*.tscn") var float_text = ''
+export(String, FILE, "*.tscn") var choice_bar = 'res://GodetteVN/Core/ChoiceBar/choiceBar.tscn'
+export(String, FILE, "*.tscn") var float_text = 'res://GodetteVN/Core/_Details/floatText.tscn'
+export(String, FILE, "*.tscn") var nvl_screen = 'res://GodetteVN/Core/_Details/nvlBox.tscn'
 export(bool) var allow_rollback = true
 export(bool) var refresh_game_ctrl_state = true
 
@@ -39,13 +40,12 @@ var _propagate_dvar_list:Dictionary = {}
 # Important components
 onready var bg = $background
 onready var QM = $VNUI/quickMenu
-onready var dialogbox = $VNUI/dialogBox/dialogBoxCore
+onready var cur_db = $VNUI/dialogBox/dialogBoxCore
 onready var speaker = $VNUI/nameBox/speaker
 onready var choiceContainer = $VNUI/choiceContainer
 onready var camera = screen.get_node('camera')
 onready var _u : Node = MyUtils
 
-var nvlBox = null # dynamic. The NVL component is only instanced when in nvl mode.
 #-----------------------
 # signals
 signal player_accept(npv)
@@ -54,7 +54,8 @@ signal dvar_set
 #--------------------------------------------------------------------------------
 func _ready():
 	vn.Files.load_config()
-	var _error = self.connect("player_accept", self, '_yield_check')
+	var _err:int = self.connect("player_accept", self, '_yield_check')
+	_err = cur_db.connect('load_next', self, 'check_dialog')
 	if refresh_game_ctrl_state:
 		vn.Pgs.resetControlStates()
 
@@ -86,8 +87,8 @@ func _input(ev):
 
 	# Can I simplify this?
 	if (ev.is_action_pressed("ui_accept") or ev.is_action_pressed('vn_accept')) and waiting_acc:
-		if hide_vnui: # Show UI
-			hide_UI(true)
+		if hide_vnui:
+			hide_UI(true) # Show UI
 		# vn_accept is mouse left click
 		if ev.is_action_pressed('vn_accept'):
 			if vn.auto_on or vn.skipping:
@@ -99,7 +100,7 @@ func _input(ev):
 		else: # not mouse
 			if vn.auto_on or vn.skipping:
 				QM.reset_auto_skip()
-			elif not vn.inNotif and not vn.inSetting:
+			if not vn.inNotif and not vn.inSetting:
 				check_dialog()
 	
 #--------------------------------- Interpretor ----------------------------------
@@ -208,7 +209,6 @@ func start_scene(blocks : Dictionary, choices: Dictionary, conditions: Dictionar
 	all_blocks = blocks
 	all_choices = choices
 	all_conditions = conditions
-	dialogbox.connect('load_next', self, 'trigger_accept')
 	if load_instr == "new_game":
 		if start_id:
 			current_index = get_target_index(start_block,start_id)
@@ -244,20 +244,14 @@ func auto_load_next(forw:bool=true):
 		load_event_at_index(current_index)
 
 #------------------------ Related to Dialog Progression ------------------------
-# Cleaned this shit up. Either on / off, or true/false. Don't mix.
 func set_nvl(ev: Dictionary, auto_forw = true):
 	if typeof(ev['nvl']) == TYPE_BOOL:
 		self.nvl = ev['nvl']
-		if self.nvl:
-			if ev.has('font'):
-				nvl_on(ev['font'])
-			else:
-				nvl_on()
-		else:
-			nvl_off()
+		if self.nvl: nvl_on(_u.has_or_default(ev,'font',''))
+		else: nvl_off()
 		auto_load_next(auto_forw)
 	elif ev['nvl'] == 'clear':
-		nvlBox.clear()
+		cur_db.queue_free()
 		auto_load_next(auto_forw)
 	else:
 		print("!!! Wrong nvl event format : %s" %ev)
@@ -269,11 +263,9 @@ func set_center(ev: Dictionary):
 		set_nvl({'nvl': true,'font':ev['font']}, false)
 	else:
 		set_nvl({'nvl': true}, false)
-	var w = _u.has_or_default(ev,"who","")
-	if ev.has('speed'):
-		say(w, ev['center'], ev['speed'])
-	else:
-		say(w, ev['center'])
+
+	say(_u.has_or_default(ev,"who",""), ev['center'], \
+		_parse_speed(_u.has_or_default(ev,'speed',vn.cps)),false, _u.has_or_default(ev,'wait',0))
 	var _has_voice:bool = _check_latest_voice(ev)
 
 func speech_parse(ev : Dictionary) -> void:
@@ -283,50 +275,42 @@ func speech_parse(ev : Dictionary) -> void:
 	one_time_font_change = ev.has('font')
 	if one_time_font_change:
 		var path:String = vn.FONT_DIR + ev['font']
-		dialogbox.add_font_override('normal_font', load(path))
+		cur_db.add_font_override('normal_font', load(path))
 
 	# Speech
 	var combine:String = "_"
 	for k in ev: # k is not voice, not speed, means it has to be "uid expression"
-		if not (k in ['voice', 'speed']):
-			combine = k # combine=unique_id and expression combined
-			break
+		if k.split(" ")[0] in vn.Chs.all_chara:
+			combine = k
+			break 
 	if combine == "_":
 		print("!!! Speech event uid format error: " + str(ev))
 		push_error("Speech event requires a valid character/narrator.")
 	
+	var wt:float = MyUtils.has_or_default(ev,'wait',0.0)
 	if ev.has('speed'):
-		if (vn.cps_map.has(ev['speed'])):
-			say(combine, ev[combine],vn.cps_map[ev['speed']] )
-		elif ev['speed'].is_valid_float():
-			say(combine, ev[combine],float(ev['speed']))
-		else:
-			print("!!! Unknown speed value in " + str(ev))
-			push_error("Unknown speed value.")
-		# Should I allow other values?
+		say(combine, ev[combine], _parse_speed(ev['speed']), false, wt)
 	else:
-		say(combine, ev[combine])
+		say(combine, ev[combine], vn.cps, false, wt)
 
 func generate_choices(ev: Dictionary):
 	# make a say event
 	if self.nvl: nvl_off()
-	else:
-		clear_boxes()
+	else: clear_boxes()
 	if vn.auto_on or vn.skipping:
 		QM.disable_skip_auto()
 	
 	var _has_voice:bool = _check_latest_voice(ev)
 	one_time_font_change = ev.has('font')
 	if one_time_font_change:
-		var path:String = vn.FONT_DIR + ev['font']
-		dialogbox.add_font_override('normal_font', load(path))
-	var combine:String = "_"
+		cur_db.add_font_override('normal_font', load(vn.FONT_DIR + ev['font']))
+	var c:String = "_"
 	for k in ev:
-		if not (k in ['choice','voice','id']):
-			combine = k
+		if k.split(" ")[0] in vn.Chs.all_chara:
+			c = k
 			break
-	if combine != "_":
-		say(combine, ev[combine], vn.cps, true)
+	if c != "_":
+		say(c,ev[c],_parse_speed(MyUtils.has_or_default(ev,'speed',vn.cps)), true)
 	
 	if ev['choice'] in ['','url']: 
 		# Intentionally left blank
@@ -334,7 +318,7 @@ func generate_choices(ev: Dictionary):
 	# Actual choices
 	var options:Array = all_choices[ev['choice']]
 	waiting_cho = true
-	for i in options.size():
+	for i in range(options.size()):
 		var ev2:Dictionary = options[i]
 		match ev2.size():
 			1: pass
@@ -362,7 +346,7 @@ func generate_choices(ev: Dictionary):
 		
 	choiceContainer.visible = true # make it visible now
 	
-func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false) -> void:
+func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false,wt:float=0):
 	var uid:String = express(combine, false, true)
 	words = preprocess(words)
 	if vn.skipping: cps = 0.0
@@ -370,17 +354,17 @@ func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false) 
 		if just_loaded:
 			just_loaded = false
 			if centered:
-				nvlBox.set_dialog(uid, words, cps, true)
+				cur_db.set_dialog(uid, words, cps, true)
 			else:
-				nvlBox.visible_characters = nvlBox.text.length()
+				cur_db.visible_characters = cur_db.text.length()
 		else:
 			if centered:
-				nvlBox.set_dialog(uid, words, cps, true)
+				cur_db.set_dialog(uid, words, cps, true)
 				vn.Pgs.nvl_text = ''
 			else:
-				nvlBox.set_dialog(uid, words, cps)
-				vn.Pgs.nvl_text = nvlBox.get_text()
-			_voice_to_hist((latest_voice!='') and vn.voice_to_history, uid, nvlBox.get_text())
+				cur_db.set_dialog(uid, words, cps)
+				vn.Pgs.nvl_text = cur_db.get_text()
+			_voice_to_hist((latest_voice!='') and vn.voice_to_history, uid, cur_db.get_text())
 	
 	else:
 		if not _hide_namebox(uid):
@@ -393,22 +377,22 @@ func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false) 
 				'bold_font': info['bold_font'],
 				'italics_font':info['italics_font'],
 				'bold_italics_font':info['bold_italics_font']}
-				dialogbox.set_chara_fonts(fonts)
+				cur_db.set_chara_fonts(fonts)
 			elif not one_time_font_change:
-				dialogbox.reset_fonts()
+				cur_db.reset_fonts()
 		
 		if just_loaded:
-			dialogbox.set_dialog(words)
+			cur_db.set_dialog(words)
 			just_loaded = false
 		else:
-			dialogbox.set_dialog(words, cps)
-			var new_text:String = dialogbox.bbcode_text
+			cur_db.set_dialog(words, cps)
+			var new_text:String = cur_db.bbcode_text
 			_voice_to_hist((latest_voice!='') and vn.voice_to_history, uid, new_text)
 			vn.Pgs.playback_events['speech'] = new_text
 		
 		stage.set_highlight(uid)
 	
-	wait_for_accept(ques)
+	wait_for_accept(ques,wt)
 	# If this is a question, then displaying the text is all we need.
 
 func extend(ev:Dictionary):
@@ -435,40 +419,40 @@ func extend(ev:Dictionary):
 		var words:String = preprocess(ev[ext])
 		var cps:float = vn.cps
 		if ev.has('speed'):
-			if (vn.cps_map.has(ev['speed'])):
-				cps = vn.cps_map[ev['speed']]
-			elif ev['speed'].is_valid_float():
-				cps = float(ev['speed'])
+			cps = _parse_speed(ev['speed'])
 		
 		_voice_to_hist(_check_latest_voice(ev) and vn.voice_to_history, prev_speaker, words)
 		if just_loaded:
 			just_loaded = false
-			dialogbox.set_dialog(vn.Pgs.playback_events['speech'], vn.cps)
+			cur_db.set_dialog(vn.Pgs.playback_events['speech'], vn.cps)
 			vn.Pgs.history.pop_back()
 		else:
-			dialogbox.bbcode_text = vn.Pgs.playback_events['speech']
-			dialogbox.set_dialog(words, cps, true)
+			cur_db.bbcode_text = vn.Pgs.playback_events['speech']
+			cur_db.set_dialog(words, cps, true)
 			vn.Pgs.playback_events['speech'] += " " + words
 			
 		stage.set_highlight(prev_speaker)
 		# wait for accept
-		wait_for_accept(false)
+		wait_for_accept(false, _u.has_or_default(ev,'wait',0))
 
-func wait_for_accept(ques:bool = false):
-	waiting_acc = true
-	if not ques:
+func wait_for_accept(ques:bool = false, wt:float=0):
+	if not ques: # not a question
+		if wt >= 0.05 and not vn.skipping: # if a wait value is passed, wait and proceed, no interaction
+			yield(cur_db, "all_visible")
+			MyUtils.schedule_job(self,"check_dialog",wt,[],'auto_dialog_wait')
+		
+		waiting_acc = true
 		yield(self, "player_accept")
 		if _nullify_prev_yield == false: # if this is false, then it's natural dialog progression
+			if wt >= 0.05: MyUtils.kill_job('auto_dialog_wait')
 			if allow_rollback: vn.Pgs.makeSnapshot()
 			music.stop_voice()
-			if centered:
-				nvl_off()
-				centered = false
+			if centered: nvl_off()
 			if not self.nvl: stage.remove_highlight()
 			waiting_acc = false
 			auto_load_next()
 		else: # The yield has been nullified, that means some outside code is trying to change dialog blocks
-			# back to default
+			# in which case, we set this back to default
 			_nullify_prev_yield = false
 
 #------------------------ Related to Music and Sound ---------------------------
@@ -490,7 +474,7 @@ func play_bgm(ev : Dictionary, auto_forw=true) -> void:
 	#	return
 		
 	# Deal with fadeout first
-	if path == "" and ev.size() > 1: # must be a fadeout
+	if (path in ["","off"]) and ev.size() > 1: # must be a fadeout
 		if ev.has('fadeout'):
 			music.fadeout(ev['fadeout'])
 			vn.Pgs.playback_events['bgm'] = {'bgm':''}
@@ -518,7 +502,7 @@ func play_bgm(ev : Dictionary, auto_forw=true) -> void:
 		push_error('Expecting a fadein field with time as its value.')
 	
 func play_sound(ev :Dictionary) -> void:
-	music.play_sound(vn.AUDIO_DIR+ev['audio'], _u.has_or_default(ev, "vol", 0))
+	music.play_sound(vn.AUDIO_DIR+ev['audio'], _u.has_or_default(ev, "vol", 0.0))
 	auto_load_next()
 	
 func voice(path:String, auto_forw:bool = true) -> void:
@@ -664,7 +648,7 @@ func _a_what_b(is_or:bool, a:bool, b:bool)->bool:
 	if is_or: return (a or b)
 	else: return (a and b)
 #--------------- Related to transition and other screen effects-----------------
-func screen_effects(ev: Dictionary, auto_forw=true):
+func screen_effects(ev: Dictionary, auto_forw:bool=true):
 	var temp:Array = ev['screen'].split(" ")
 	var ef:String = temp[0]
 	match ef:
@@ -819,6 +803,7 @@ func character_event(ev : Dictionary) -> void:
 			print("!!! Wrong character join/fadein format.")
 			push_error("Character join/fadein must have a loc field.")
 
+# combine : uid expr combination. Changes expression, and returns uid optionally
 func express(combine : String, auto_forw:bool = true, ret_uid:bool = false):
 	var temp:PoolStringArray = combine.split(" ")
 	var uid:String = vn.Chs.forward_uid(temp[0])
@@ -916,24 +901,17 @@ func sideImageChange(ev:Dictionary, auto_forw:bool = true):
 
 func check_dialog():
 	if not QM.hiding: QM.visible = true
-	hide_vnui = false
 	if hide_vnui:
 		hide_vnui = false
 		if self.nvl:
-			nvlBox.visible = true
-			if self.centered:
-				dimming(vn.CENTER_DIM)
-			else:
-				dimming(vn.NVL_DIM)
+			cur_db.visible = true
+			if self.centered: dimming(vn.CENTER_DIM)
+			else: dimming(vn.NVL_DIM)
 		else:
 			show_boxes()
 	
-	if self.nvl and nvlBox.adding:
-		nvlBox.force_finish()
-	elif not self.nvl and dialogbox.adding:
-		dialogbox.force_finish()
-	else:
-		emit_signal("player_accept", false)
+	if cur_db.adding: cur_db.force_finish()
+	else: emit_signal("player_accept", false)
 
 func generate_nullify():
 	# Suppose you're in an invetigation scene. Speaker A says something, then 
@@ -944,25 +922,19 @@ func generate_nullify():
 
 func clear_boxes():
 	speaker.bbcode_text = ''
-	dialogbox.bbcode_text = ''
-	#if dialogbox.eod:
-	#	dialogbox.timer.stop()
-	#	dialogbox.bbcode_text = ''
-	#	dialogbox.eod = false
+	cur_db.bbcode_text = ''
 
-func wait(time : float) -> void:
+func wait(time : float, auto_forw:bool=true) -> void:
 	if just_loaded: just_loaded = false
 	if not vn.skipping and time >= 0.05:
-		time = stepify(time, 0.1)
 		yield(get_tree().create_timer(time), "timeout")
-	auto_load_next()
 	
+	auto_load_next(auto_forw)
 
-func on_choice_made(ev : Dictionary, rollback_to_choice = true) -> void:
+func on_choice_made(ev : Dictionary, rollback_to_choice:bool = true) -> void:
 	# rollback_to_choice is only used when called externally.
 	QM.enable_skip_auto()
 	_u.free_children(choiceContainer)
-	
 	if allow_rollback:
 		if rollback_to_choice:
 			vn.Pgs.makeSnapshot()
@@ -994,7 +966,6 @@ func on_rollback():
 		stage.set_sideImage()
 		camera.reset()
 		waiting_cho = false
-		centered = false
 		nvl_off()
 		# choiceContainer.propagate_call('queue_free') Will 
 		_u.free_children(choiceContainer)
@@ -1066,7 +1037,7 @@ func load_playback(play_back:Dictionary, RBM:bool = false): # Roll Back Mode
 	if play_back['nvl'] != '':
 		nvl_on()
 		vn.Pgs.nvl_text = play_back['nvl']
-		nvlBox.bbcode_text = vn.Pgs.nvl_text
+		cur_db.bbcode_text = vn.Pgs.nvl_text
 	
 	vn.inLoading = false
 	just_loaded = true
@@ -1114,25 +1085,26 @@ func flt_text(ev: Dictionary) -> void:
 
 func nvl_off():
 	show_boxes()
-	if nvlBox != null:
-		nvlBox.clear() # will queue free
-	nvlBox = null
-	get_node('background').modulate = Color(1,1,1,1)
-	stage.set_modulate_4_all(Color(0.86,0.86,0.86,1))
+	if self.nvl:
+		cur_db.queue_free()
+		print($VNUI.get_children())
+		cur_db = $VNUI/dialogBox/dialogBoxCore
+		get_node('background').modulate = Color(1,1,1,1)
+		stage.set_modulate_4_all(Color(0.86,0.86,0.86,1))
 	self.nvl = false
+	self.centered = false
 
 func nvl_on(center_font:String=''):
 	stage.set_modulate_4_all(vn.DIM)
-	if centered: nvl_off()
 	clear_boxes()
 	hide_boxes()
-	nvlBox = load(vn.DEFAULT_NVL).instance()
-	nvlBox.connect('load_next', self, 'trigger_accept')
-	$VNUI.add_child(nvlBox)
+	cur_db = load(nvl_screen).instance()
+	var _err:int = cur_db.connect('load_next', self, 'check_dialog')
+	$VNUI.add_child(cur_db)
 	if centered:
-		nvlBox.center_mode()
+		cur_db.center_mode()
 		if center_font != '':
-			nvlBox.add_font_override('normal_font', load(vn.ROOT_DIR+center_font))
+			cur_db.add_font_override('normal_font', load(vn.ROOT_DIR+center_font))
 		get_node('background').modulate = vn.CENTER_DIM
 		stage.set_modulate_4_all(vn.CENTER_DIM)
 	else:
@@ -1140,21 +1112,7 @@ func nvl_on(center_font:String=''):
 		stage.set_modulate_4_all(vn.NVL_DIM)
 	self.nvl = true
 
-func trigger_accept():
-	if not waiting_cho:
-		emit_signal("player_accept", false)
-		if hide_vnui:
-			if not QM.hiding: QM.visible = true
-			if self.nvl:
-				nvlBox.visible = true
-				if self.centered:
-					dimming(vn.CENTER_DIM)
-				else:
-					dimming(vn.NVL_DIM)
-			else:
-				show_boxes()
-		
-func hide_UI(show=false):
+func hide_UI(show:bool=false):
 	if show:
 		hide_vnui = false
 	else:
@@ -1163,12 +1121,12 @@ func hide_UI(show=false):
 		QM.visible = false
 		hide_boxes()
 		if self.nvl:
-			nvlBox.visible = false
+			cur_db.visible = false
 			dimming(Color(1,1,1,1))
 	else:
 		if not QM.hiding: QM.visible = true
 		if self.nvl:
-			nvlBox.visible = true
+			cur_db.visible = true
 			if self.centered: dimming(vn.CENTER_DIM)
 			else: dimming(vn.NVL_DIM)
 		else:
@@ -1393,10 +1351,15 @@ func _parse_true_false(truth) -> bool:
 			if truth.to_lower() == "true": return true
 			else: return false # A little sloppy
 		_: return false
-
-func _dialog_state_reset():
-	if nvl: nvlBox.nw = false
-	else: dialogbox.nw = false
+		
+func _parse_speed(sp):
+	match typeof(sp):
+		TYPE_REAL,TYPE_INT: return sp
+		TYPE_STRING:
+			if sp in vn.cps_map:
+				return vn.cps_map[sp]
+			elif sp.is_valid_float():
+				return abs(float(sp))
 
 # Move this to somewhere else? 
 func _notification(what):
@@ -1405,7 +1368,6 @@ func _notification(what):
 		QM.reset_auto_skip()
 
 func preprocess(words : String) -> String:
-	_dialog_state_reset()
 	var leng:int = words.length()
 	var output:String = ''
 	var i:int = 0
@@ -1420,10 +1382,6 @@ func preprocess(words : String) -> String:
 				if i >= leng:
 					push_error("Please do not use [] unless for bbcode and display dvar purposes.")
 			match inner:
-				"nw":
-					if not vn.skipping:
-						if self.nvl: nvlBox.nw = true
-						else: dialogbox.nw = true
 				"sm": output += ";"
 				"dc": output += "::"
 				"nl": output += "\n"

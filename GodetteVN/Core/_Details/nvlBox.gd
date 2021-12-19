@@ -6,7 +6,6 @@ onready var timer = $Timer
 var autoCounter:int = 0
 var skipCounter:int = 0
 var adding:bool = false
-var nw:bool = false
 
 # center = nvl in disguise
 const default_size:Vector2 = Vector2(1100,800)
@@ -17,7 +16,9 @@ var last_uid:String = ''
 var new_dialog:String = ''
 
 var _target_leng:int = 0
+
 signal load_next
+signal all_visible
 
 func _ready():
 	var _err:int = vn.get_node("GlobalTimer").connect("timeout",self, "_on_global_timeout")
@@ -26,9 +27,9 @@ func _ready():
 	_err = sb.connect("mouse_exited", vn.Utils, "yes_mouse")
 
 func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name = false):
+	$Tween.remove(self,"visible_characters")
 	if suppress_name: # if name should not be shown, as in the center case treat it as if it is the narrator
 		uid = ""
-		
 	if (uid != last_uid):
 		last_uid = uid
 		if uid == "":
@@ -55,9 +56,6 @@ func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name = fals
 	if cps <= 0:
 		visible_characters = _target_leng
 		adding = false
-		if nw:
-			nw = false
-			emit_signal("load_next")
 		return
 	
 	$Tween.interpolate_property(self,'visible_characters',visible_characters,\
@@ -72,11 +70,8 @@ func force_finish():
 	$Tween.remove(self,"visible_characters")
 	visible_characters = _target_leng
 	adding = false
-	if nw:
-		nw = false
-		if not vn.skipping:
-			emit_signal("load_next")
-			
+	emit_signal("all_visible")
+
 func _on_Tween_tween_completed(object, key):
 	if key == ":visible_characters" and object == self:
 		force_finish()
@@ -91,9 +86,9 @@ func center_mode():
 	self.grow_vertical = Control.GROW_DIRECTION_BOTH
 	self.bbcode_text = "[center]"
 
-func clear():
+func queue_free():
 	vn.Pgs.nvl_text = ""
-	queue_free()
+	.queue_free()
 
 func _on_global_timeout():
 	if vn.skipping:
@@ -102,12 +97,11 @@ func _on_global_timeout():
 		if skipCounter == 1:
 			emit_signal("load_next")
 	else:
-		if not adding and vn.auto_on: 
+		if not adding and vn.auto_on and not MyUtils.has_job('auto_dialog_wait'): 
 			autoCounter += 1
-			if autoCounter >= vn.auto_bound:
+			if autoCounter >= vn.auto_time * 20:
 				autoCounter = 0
-				if not nw:
-					emit_signal("load_next")
+				emit_signal("load_next")
 		else:
 			autoCounter = 0
 		skipCounter = 0

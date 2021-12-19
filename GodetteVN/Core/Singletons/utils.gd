@@ -30,18 +30,31 @@ func bounded(v:float, b:Vector2, lower_incl:bool=true, upper_incl:bool=true)->bo
 # Free Children
 func free_children(n:Node):
 	for c in n.get_children():
-		c.queue_free()
+		c.call_deferred('free')
 
 #------------------------------------------------------------
 # OneShot Job Scheduler
-func schedule_job(n:Node, method:String, wtime:float, params:Array):
+func schedule_job(n:Node, method:String, wtime:float, params:Array, jname:String=''):
 	var timer:Timer = Timer.new()
 	timer.one_shot = true
 	timer.wait_time = wtime
+	if jname != '':
+		timer.name = jname
 	var _e:bool = timer.connect('timeout',self,'_run_job',[timer,n,method,params])
 	add_child(timer)
 	timer.start()
-		
+	
+func has_job(jname:String)->bool:
+	for c in get_children():
+		if c is Timer and c.name == jname:
+			return true
+	return false
+
+func kill_job(jname:String):
+	for c in get_children():
+		if c is Timer and c.name == jname:
+			c.queue_free()
+
 func _run_job(t:Timer, n:Node, m:String, params:Array):
 	t.queue_free()
 	if is_instance_valid(n):

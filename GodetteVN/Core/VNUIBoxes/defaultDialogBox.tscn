@@ -6,7 +6,7 @@
 [ext_resource path="res://fonts/DEFAULT_NORMAL.tres" type="DynamicFont" id=4]
 [ext_resource path="res://GodetteVN/Core/VNUIBoxes/dialogBoxCore.tscn" type="PackedScene" id=5]
 
-[node name="dialogBoxOuter" type="ColorRect"]
+[node name="dialogBox" type="ColorRect"]
 margin_left = 436.0
 margin_top = 831.776
 margin_right = 1509.0

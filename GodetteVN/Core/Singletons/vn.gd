@@ -45,19 +45,19 @@ const DIRECTION:Dictionary = {'up': Vector2.UP, 'down': Vector2.DOWN, 'left': Ve
 # Bad names for dvar
 const BAD_NAMES = PoolStringArray(["nw", "nl", "sm", 'dc','color', 'true', 'false'])
 # Bad uids for characters
-const BAD_UIDS:PoolStringArray = PoolStringArray(['all', ''])
+const BAD_UIDS:PoolStringArray = PoolStringArray(['all', '', 'voice', 'speed','_', 'wait'])
 
 
 # --------------------------- Other Game Variables ------------------------
 # Need refactor
 var auto_on:bool = false # Auto forward or not
-var auto_bound:int = -1 # Initialize to -1. Will get changed in fileRelated.
-# how many 0.05s do we need to wait if auto is on
-# Formula ((-1)*auto_speed + 3.25)*20
+var auto_time:int = 1 # default val is 1 because in setting screen
+# normal has index 1, which means 2s. Slow has index 0, which means 3 seconds
+# and fast has index 2 which means 1s.
 
 # Default CPS
 var cps : float = 36.0
-var cps_map:Dictionary = {'fast':50.0, 'normal':cps, 'slow':25.0, 'instant':0.0, 'slower':10.0}
+var cps_map:Dictionary = {'fast':50.0, 'normal':cps, 'slow':20.0, 'instant':0.0, 'slower':10.0}
 
 # ---------------------------- Dvar Varibles ----------------------------
 
@@ -99,31 +99,27 @@ const THUMBNAIL_DIR:String = "user://temp/"
 const FONT_DIR:String = "res://fonts/"
 
 # Will remove these three.
-# Important small things. These will be made scene specific.
-const DEFAULT_CHOICE:String = "res://GodetteVN/Core/choiceBar.tscn"
-const DEFAULT_FLOAT:String = 'res://GodetteVN/Core/_Details/floatText.tscn'
-const DEFAULT_NVL:String = "res://GodetteVN/Core/_Details/nvlBox.tscn"
 
 
 # ------------------------- Game State Variables--------------------------------
 # Maybe I should move these variables to somewhere else?
 
 # Special game state variables
-var inLoading = false # Is the game being loaded from the save now? (Only used
+var inLoading:bool = false # Is the game being loaded from the save now? (Only used
 # in the load system and in the rollback system.)
 
-var inNotif = false # Is there a notification?
+var inNotif:bool = false # Is there a notification?
 
-var inSetting = false # Is the player in an external menu? Setting/history/save/load
+var inSetting:bool = false # Is the player in an external menu? Setting/history/save/load
 # / your menu
 
-var noMouse = false # Used when your mouse hovers over buttons on quickmenu
+var noMouse:bool = false # Used when your mouse hovers over buttons on quickmenu
 # When you click the quickmenu button, because noMouse is turned on, the same
 # click will not register as 'continue dialog'.
 # This is important when you do scenes like an investigation where players will
 # click different objects.
 
-var skipping = false # Is the player skipping right now?
+var skipping:bool = false # Is the player skipping right now?
 
 func reset_states():
 	inLoading = false
@@ -167,19 +163,6 @@ func event_reader(ev:Dictionary)->int:
 		_: m = -1
 	
 	return m
-
-#Deprecated
-func error(message, ev = {}):
-	if message == "p" or message == "path":
-		message = "Path invalid."
-	if message == 'dvar':
-		message = "Dvar not found."
-	
-	if ev.size() != 0:
-		message += "\n Possible error at event: " + str(ev)
-			
-	push_error(message)
-	get_tree().quit()
 	
 func dvar_initialization():
 	$Dvars.dvar_initialization()
