@@ -1,6 +1,6 @@
 # GodetteVN, A Visual Novel Framework for Godot Users
 
-## No major change planned before Godot 4, which means there won't be any major change probably in the next year or so.
+## I am focusing on making a game with this rn. No update planned unless it's a bug.
 
 ![Godette](/Showcases/show1.png)
 

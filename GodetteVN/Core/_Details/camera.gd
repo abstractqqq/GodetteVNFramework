@@ -36,6 +36,7 @@ func camera_shake(ev:Dictionary):
 	if time < 0.5 and time > 0:
 		time = 0.5
 	type = 0
+	self.offset = default_offset
 	set_process(true and not vn.skipping)
 	if time > 0:
 		MyUtils.schedule_job(self,"shake_off",time,[])
