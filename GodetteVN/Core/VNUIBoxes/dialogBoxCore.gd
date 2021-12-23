@@ -6,7 +6,7 @@ extends RichTextLabel
 # export(bool) var noise_on = false
 # export(String) var noise_file_path = ''
 
-onready var timer = $Timer
+onready var timer:Timer = $Timer
 
 var autoCounter:int = 0
 var skipCounter:int = 0

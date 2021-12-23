@@ -2,6 +2,11 @@
 
 ## No major change planned before Godot 4, which means there won't be any major change probably in the next year or so.
 
+![Godette](/Showcases/show1.png)
+
+#### For more showcases, scroll down and see the gallery.
+---------------------------------------------
+
 ## Goal and Vision: Bringing the theatrical experience into your story, right in the Godot Engine.
 
 ### Highlights and Goals: (subject to change...)
@@ -71,6 +76,20 @@ Projects done with this template:
 More in the making ~
 
 ------------------------------------------------------------------------------------------------------------------------------
+### Default Controls:
+
+1. Left click, enter, space : continue dialog
+2. right click : hide VN related UI (dialog box, name box, quick menu) and only show sprites and background
+3. control + z : rollback to previous dialog
+4. Tab (only in script editor) : generates the ":: ;" string for you. When you have selected text which corresponds to some events, then it will try to generate the event text for you. For instance, if you have selected "a join", it will be interpreted as "there exists a character with uid a, and is joining the scene" and will print "chara:: a join; loc :: * ; expression :: default ;" for you in the script editor.
+
+### Exporting your game
+
+Make sure you know where the game data directory is. Go to top left corner, project -> open project data folder. You will have to run the project at least once to have a folder. The path of this folder is where save data and some other data is saved.
+
+You need to download the Godot export template to export your game. In addition, you need to enter *.json in the resource tab when exporting. See here
+
+![Exporting](/Showcases/exporting.png)
 
 ### Known issues:
 
@@ -83,7 +102,21 @@ Documentation will be in the VNScript editor in the framework.
 
 ------------------------------------------------------------------------------------------------------------------------------
 
-### You can contact me on Discord for any questions.
+## You can contact me on Discord for any questions.
 
 Discord: T.Q#8863
 Twitter: @TqAbstrac
+
+
+-----
+
+# Gallery (Framework Showcases)
+
+![Weather](/Showcases/show3.png)
+Builtin weather system made by particle effects.
+
+![tint](/Showcases/show2.png)
+Builtin tint screen functionality.
+
+![flashlight](/Showcases/show4.png)
+Easy to integrate other visual effects like flashlights. 

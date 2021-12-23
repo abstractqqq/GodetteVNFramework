@@ -12,7 +12,6 @@ var main_block = [
 	{"gt": "Here we demonstrate how to do animations (spritesheet)."},
 	{"chara": "gt add", "at":"head", "path":"/GodetteVN/sfxScenes/questionMark.tscn"},
 	{"gt cry": "As long as you have the spritesheet ready, animation is as easy as drag and drop."},
-	{"gt": "You can look at the top left corner to see the events controlling everything."},
 	{"express": "gt crya"},
 	{"gt": "This baka is making me cry... ..."},
 	{'gt': "Yes, animation is compatible with all other character actions likes shake and move."},

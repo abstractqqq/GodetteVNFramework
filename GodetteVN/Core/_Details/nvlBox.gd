@@ -1,7 +1,7 @@
 extends RichTextLabel
 
 # Same as dialog box
-onready var timer = $Timer
+onready var timer:Timer = $Timer
 
 var autoCounter:int = 0
 var skipCounter:int = 0

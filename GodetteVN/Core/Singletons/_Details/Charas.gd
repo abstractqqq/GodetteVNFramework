@@ -14,14 +14,13 @@ func _ready():
 		spriteless_character(ch)
 	# Maybe free, maybe not free?
 	$RegisteredCharacters.queue_free()
+	vn.BAD_UIDS.clear() # Not used anymore.
 
 # Keep a record of the path to the scene of the stage character
 func stage_character(uid:String) -> void:
-	if uid in vn.BAD_UIDS or uid.begins_with("_"):
-		if uid == "":
-			push_error("The empty string uid is preserved for the narrator.")
-		else:
-			push_error("The uid %s is not allowed."% [uid])
+	if uid in vn.BAD_UIDS:
+		print("Uids in the following list are not allowed: %s." % vn.BAD_UIDS)
+		push_error("The uid %s is not allowed."% [uid])
 	
 	var path:String = vn.CHARA_SCDIR+uid+".tscn"
 	var c:Character = load(path).instance()
@@ -43,10 +42,10 @@ func spriteless_character(cdata:Dictionary)->void:
 	if cdata.has("uid") and cdata.has("display_name"):
 		var uid:String = cdata['uid']
 		if uid in vn.BAD_UIDS:
-			push_error("!!! %s is a bad uid choice. Choose another one." % uid)
-		if not cdata.has("name_color"): 
-			cdata['name_color'] = Color.black
+			print("Uids in the following list are not allowed: %s." % vn.BAD_UIDS)
+			push_error("The uid %s is not allowed."% [uid])
 		
+		cdata['name_color'] = MyUtils.has_or_default(cdata,'color', Color.black)
 		all_chara[uid] = cdata
 	else:
 		push_error("!!! Wrong spriteless character format. Need at least uid and display_name fields.")
@@ -55,8 +54,8 @@ func get_character_info(uid:String):
 	if all_chara.has(uid):
 		return all_chara[uid]
 	else:
-		push_error("No character with this uid %s is found" % uid )
-
+		print("No character with this uid %s is found." % uid )
+		print("Nothing is done. There may or may not be a bug because of this.")
 
 # Use case of point_uid_to
 # Suppose you have prepared a male ver and female ver of your protagonist's
@@ -87,17 +86,17 @@ func set_noname(uid:String):
 	if all_chara.has(uid):
 		all_chara[uid]['no_nb'] = true
 	else:
-		push_error("The uid %s has not been regiestered when this line is executed. Might also be a typo." % [uid])
+		push_error("The uid %s has not been regiestered when this function is called." % [uid])
 
 func set_new_display_name(uid:String, new_dname:String):
 	if all_chara.has(uid):
 		all_chara[uid]['display_name'] = new_dname
 		chara_name_patch[uid] = new_dname
 	else:
-		push_error("The uid %s has not been regiestered when this line is executed. Might also be a typo." % [uid])
+		push_error("The uid %s has not been regiestered when this function is called." % [uid])
 		
 func patch_display_names():
-	if chara_name_patch.size()>0:
+	if not chara_name_patch.empty():
 		for uid in chara_name_patch:
 			set_new_display_name(uid,chara_name_patch[uid])
 

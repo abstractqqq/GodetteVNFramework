@@ -535,8 +535,7 @@ func change_background(ev : Dictionary, auto_forw=true) -> void:
 
 func change_scene_to(path : String):
 	stage.clean_up()
-	change_weather('', false) # NOT screen.weather_off because we need to tell the sys
-	# remove record of weather, which is only done in change_weather()
+	change_weather('', false) # 
 	QM.reset_auto_skip()
 	print("You are changing scene. Rollback will be cleared. It's a good idea to explain "+\
 	"to the player the rules about rollback.")
@@ -632,7 +631,7 @@ func check_condition(cond_list) -> bool:
 				"<": result = (front < back)
 				">": result = (front > back)
 				"!=": result = (front!= back)
-				_: push_error("Unknown relation %s" %rel)
+				_: print("Unknown relation %s. Nothing is done." %rel)
 			
 			final_result = _a_what_b(is_or, final_result, result)
 		elif type == TYPE_ARRAY: # array type
@@ -655,23 +654,21 @@ func screen_effects(ev: Dictionary, auto_forw:bool=true):
 		"", "off": 
 			screen.removeLasting()
 			vn.Pgs.playback_events.erase('screen')
-		"tint": tint(ev)
-		"tintwave": tint(ev)
+		"tint", "tintwave": tint(ev)
 		"flashlight": flashlight(ev)
 		_:
-			if temp.size()==2 and not vn.skipping:
+			if temp.size()==2 and not vn.skipping and ef in vn.TRANSITIONS:
 				var mode:String = temp[1]
 				var c:Color = _u.has_or_default(ev, "color", Color.black)
 				var t:float = _u.has_or_default(ev,"time",1.0)
-				if ef in vn.TRANSITIONS:
-					if mode == "out": # this might be a bit counter-intuitive
-						# but we have to stick with this
-						screen.screen_transition('in',ef,c,t)
-						yield(screen, "transition_mid_point_reached")
-					elif mode == "in":
-						screen.screen_transition('out',ef,c,t)
-						yield(screen, "transition_finished")
-				screen.reset()
+				if mode == "out": # this might be a bit counter-intuitive
+					# but we have to stick with this
+					screen.screen_transition('in',ef,c,t)
+					yield(screen, "transition_mid_point_reached")
+				elif mode == "in":
+					screen.screen_transition('out',ef,c,t)
+					yield(screen, "transition_finished")
+			screen.reset()
 	
 	auto_load_next(!vn.inLoading and auto_forw)
 
@@ -680,17 +677,10 @@ func flashlight(ev:Dictionary):
 	vn.Pgs.playback_events['screen'] = ev
 
 func tint(ev : Dictionary) -> void:
-	if ev.has('color'):
-		if ev['screen'] == 'tintwave':
-			screen.tintWave(ev['color'], _u.has_or_default(ev,'time',1.0))
-		elif ev['screen'] == 'tint':
-			screen.tint(ev['color'], _u.has_or_default(ev,'time',1.0))
-			# When saving to playback, no need to replay the fadein effect
-			ev['time'] = 0.05
-		vn.Pgs.playback_events['screen'] = ev
-	else:
-		print("!!! Screen tint event format error.")
-		push_error("Tint or tintwave requires a color field.")
+	screen.call(ev['screen'], _u.has_or_default(ev,'color',Color()),\
+		_u.has_or_default(ev,'time',1.0))
+	if ev['screen'] == "tint" : ev['time'] = 0.05
+	vn.Pgs.playback_events['screen'] = ev
 
 # Scene animations/special effects
 func sfx_player(ev : Dictionary) -> void:
@@ -704,68 +694,19 @@ func sfx_player(ev : Dictionary) -> void:
 		var a:AnimationPlayer = target_scene.get_node_or_null('AnimationPlayer')
 		if a and a.has_animation(ev['anim']):
 			a.play(ev['anim'])
-		else:
-			print("!!! Warning: your target scene either has no AnimationPlayer subnode or it has no "+\
-			"animation named %s. Nothing is done." %ev['anim'])
-			print("!!! Your animation player must be named 'AnimationPlayer' for the system to recognize it.")
 	auto_load_next()
 
-# Refactor
 func camera_effect(ev : Dictionary) -> void:
-	var ef_name:String = ev['camera']
-	match ef_name:
-		"vpunch": camera.vpunch()
-		"hpunch": camera.hpunch()
-		"reset", '': camera.reset()
-		"zoom":
-			QM.reset_skip()
-			if ev.has('scale'):
-				var type:String = _u.has_or_default(ev,'type','linear')
-				if type == 'instant' or vn.skipping:
-					camera.zoom(ev['scale'], _u.has_or_default(ev,'loc',Vector2(0,0)))
-				else:
-					camera.zoom_timed(ev['scale'], _u.has_or_default(ev,'time',1), type,\
-						_u.has_or_default(ev,'loc',Vector2(0,0)))
-				vn.Pgs.playback_events['camera'] = {'zoom':camera.target_zoom, 'offset':camera.target_offset,\
-				'deg':camera.target_degree}
-			else:
-				print("!!! Wrong camera zoom format: %s" %ev)
-				push_error('Camera zoom expects a scale.')
-		"move":
-			QM.reset_skip()
-			var time:float = _u.has_or_default(ev, 'time', 1)
-			var type:String = _u.has_or_default(ev, 'type', 'linear')
-			if ev.has('loc'):
-				if vn.skipping or type == "instant": time = 0
-				camera.camera_move(ev['loc'], time, type)
-				vn.Pgs.playback_events['camera'] = {'zoom':camera.target_zoom, 'offset':camera.target_offset, 'deg':camera.target_degree}
-			else:
-				print("!!! Wrong camera event format: " + str(ev))
-				push_error("Camera move expects a loc and time, and type (optional)")
-		"shake":
-			if not vn.skipping: # min shake time is 0.5, default 2.0
-				camera.shake(_u.has_or_default(ev,'amount',250), max(_u.has_or_default(ev,'time',2.0),0.5))
-		"spin":
-			if ev.has('deg'):
-				var type:String = _u.has_or_default(ev,'type','linear')
-				var sdir:int = _u.has_or_default(ev,'sdir', 1)
-				if vn.skipping or type == "instant":
-					camera.rotation_degrees += (sdir*ev['deg'])
-					camera.target_degree = camera.rotation_degrees
-					vn.Pgs.playback_events['camera'] = {'zoom':camera.target_zoom, 'offset':camera.target_offset,\
-					'deg':camera.target_degree}
-				else:
-					camera.camera_spin(sdir,ev['deg'], _u.has_or_default(ev,'time',1.0), type)
-					vn.Pgs.playback_events['camera'] = {'zoom':camera.target_zoom, 'offset':camera.target_offset,\
-					 'deg':camera.target_degree}
-				
-			else:
-				print("!!! Event format error: " + str(ev))
-				push_error("Camera spin event must have a 'deg' degree field.")
+	var action : String = ev['camera']
+	match action:
+		"vpunch", "hpunch", "shake": action = 'shake' 
+		"reset", '': action = 'reset'
+		"zoom", 'move', 'spin': QM.reset_skip()
 		_:
 			print("!!! Unknown camera event: " + str(ev))
-			push_error("Camera effect not found.")
+			push_error("Camera effect %s does not exist." % ev['camera'])
 			
+	camera.call("camera_%s"%action, ev)
 	auto_load_next()
 #----------------------------- Related to Character ----------------------------
 func character_event(ev : Dictionary) -> void:
@@ -775,7 +716,6 @@ func character_event(ev : Dictionary) -> void:
 	var uid:String = vn.Chs.forward_uid(temp[0]) # uid of the character
 	var ef:String = temp[1] # what character effect
 	if uid == 'all' or stage.is_on_stage(uid):
-		var valid:bool = true
 		match ef: # jump and shake will be ignored during skipping
 			"shake", "vpunch", "hpunch":
 				var modes:Dictionary = {"shake":0, "vpunch":1,"hpunch":2}
@@ -787,9 +727,8 @@ func character_event(ev : Dictionary) -> void:
 				if ev.has('amount'):
 					ev['loc'] = _parse_loc(ev['amount']) + stage.get_chara_pos(uid)
 			_: 
-				valid = false
 				push_error('Unknown character event/action: %s' % ev)
-		if valid: stage.call("character_%s"%ef, uid, ev)
+		stage.call("character_%s"%ef, uid, ev)
 		auto_load_next()
 	else: # uid is not all, and character not on stage, must be join or fadein
 		if ev.has('loc'):
@@ -964,10 +903,9 @@ func on_rollback():
 			vn.Pgs.history.pop_back()
 		screen.clean_up()
 		stage.set_sideImage()
-		camera.reset()
+		camera.camera_reset()
 		waiting_cho = false
 		nvl_off()
-		# choiceContainer.propagate_call('queue_free') Will 
 		_u.free_children(choiceContainer)
 		generate_nullify()
 	else: # Show to readers that they cannot rollback further
@@ -1012,12 +950,12 @@ func load_playback(play_back:Dictionary, RBM:bool = false): # Roll Back Mode
 		
 	var ctrl_state:Dictionary = play_back['control_state']
 	for k in ctrl_state:
-		if ctrl_state[k] == false:
-			system({'system': k + " off"})
-		else:
+		if ctrl_state[k]:
 			system({'system': k + " on"})
+		else:
+			system({'system': k + " off"})
 	
-	var onStageCharas:Array = []
+	var onStageCharas:PoolStringArray = []
 	for d in play_back['charas']:
 		if RBM:
 			onStageCharas.push_back(d['uid'])
@@ -1032,7 +970,7 @@ func load_playback(play_back:Dictionary, RBM:bool = false): # Roll Back Mode
 		stage.set_flip(d['uid'],d['fliph'],d['flipv'])
 		stage.character_scale(d['uid'],{'scale':d['scale'], 'type':"instant"})
 	
-	if RBM: stage.remove_on_rollback(onStageCharas)
+	if RBM: stage.remove_not_in(onStageCharas)
 	
 	if play_back['nvl'] != '':
 		nvl_on()
@@ -1317,20 +1255,15 @@ func _parse_color(color, ev = {}) -> Color:
 	if color.is_valid_html_color():
 		return Color(color)
 	else:
-		# If you get error here, that means the string cannot be split
-		# as floats with delimiter space.
 		var color_vec:PoolRealArray = color.split_floats(" ", false)
-		var s:int = color_vec.size()
-		if s in [3,4]:
-			if s == 3:
-				return Color(color_vec[0], color_vec[1], color_vec[2])
-			else:
-				return Color(color_vec[0], color_vec[1], color_vec[2], color_vec[3])
-		else:
-			print("!!! Error color format: " + str(ev))
-			push_error("Expecting value of the form float1 float2 float3( float4) after color.")
-			return Color()
-			
+		match color_vec.size():
+			3: return Color(color_vec[0], color_vec[1], color_vec[2])
+			4: return Color(color_vec[0], color_vec[1], color_vec[2], color_vec[3])
+			_:
+				print("!!! Error color format: " + str(ev))
+				push_error("Expecting value of the form float1 float2 float3( float4) after color.")
+		return Color()
+		
 func _parse_nvl(nvl_state):
 	var t:int = typeof(nvl_state)
 	if t == TYPE_BOOL:

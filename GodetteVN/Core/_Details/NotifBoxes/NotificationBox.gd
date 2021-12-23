@@ -8,7 +8,6 @@ var dragging_start_pos:Vector2 = Vector2()
 
 # Used if type = override, override_dcision
 signal decision(yes)
-
 # Used every time, convenience signal when yielding for notification
 signal clicked
 
@@ -62,7 +61,6 @@ func _on_yesButton_pressed():
 		"override":
 			emit_signal("decision", true)
 		"quit":
-			vn.Files.write_to_config()
 			get_tree().quit()
 		"make_save":
 			vn.Utils.make_a_save("", 0.2)
@@ -73,6 +71,3 @@ func _on_yesButton_pressed():
 func _on_okButton_pressed():
 	emit_signal("clicked")
 	vn.Notifs.hide()
-
-
-

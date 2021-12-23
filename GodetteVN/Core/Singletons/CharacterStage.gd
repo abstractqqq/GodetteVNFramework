@@ -13,10 +13,10 @@ func set_sideImage(sc:Vector2 = Vector2(1,1), pos:Vector2 = Vector2(-35,530)):
 	$other/sideImage.scale = sc
 	$other/sideImage.position = pos
 	
-func change_expression(uid:String, expression:String):
+func change_expression(uid:String, expr:String):
 	var info:Dictionary = vn.Chs.all_chara[uid]
 	if info.has('path'):
-		var _err:bool = find_chara_on_stage(uid).change_expression(expression)
+		var _e:bool = find_chara_on_stage(uid).change_expression(expr)
 
 func character_shake(uid : String, ev:Dictionary):
 	if vn.skipping: return
@@ -44,7 +44,7 @@ func character_jump(uid:String, ev:Dictionary):
 		
 func character_spin(uid:String, ev:Dictionary):
 	# degrees:float = 360.0, time:float = 1.0, sdir:int = 1, type:String="linear"
-	var sdir = MyUtils.has_or_default(ev,'sdir',1)
+	var sdir:int = MyUtils.has_or_default(ev,'sdir',1)
 	var time:float = MyUtils.has_or_default(ev,'time',1)
 	var degrees:float = MyUtils.has_or_default(ev,'deg',360)
 	var type:String = MyUtils.has_or_default(ev,'type','linear')
@@ -135,21 +135,22 @@ func character_join(uid: String, ev:Dictionary):
 			c.modulate = vn.DIM
 
 func character_add(uid:String, ev:Dictionary):
-	var pt_name:String = ev['at']
-	var path:String = ''
+	var pt_name:String 
+	var path:String 
 	if ev.has('path') and ev.has('at'):
 		pt_name = ev['at']
 		path = vn.ROOT_DIR + ev['path']
 	else:
 		print("!!! Character add event format error.")
-		push_error('Character add expects a path and an "at".')
+		push_error('Character add expects "path" and "at" fields.')
 	
 	if uid == 'all':
 		for c in $characters.get_children():
-			for n in c.get_children():
-				if n is Node2D and n.name == ('_' + pt_name):
-					n.add_child(load(path).instance())
-					break
+			if c is Character and c.in_all:
+				for n in c.get_children():
+					if n is Node2D and n.name == ('_' + pt_name):
+						n.add_child(load(path).instance())
+						break
 	else:
 		var c:Character = find_chara_on_stage(uid)
 		for n in c.get_children():
@@ -172,11 +173,10 @@ func remove_highlight() -> void:
 
 func character_leave(uid : String):
 	if uid == 'absolute_all':
-		for n in $characters.get_children():
-			n.call_deferred("free")
+		MyUtils.free_children($characters)
 	elif uid == 'all':
 		for n in $characters.get_children():
-			if n.in_all:
+			if n is Character and n.in_all:
 				n.call_deferred("free")
 	else:
 		find_chara_on_stage(uid).call_deferred("free")
@@ -222,7 +222,8 @@ func clean_up():
 	character_leave("absolute_all")
 	set_sideImage()
 
-func remove_on_rollback(arr):
+# remove characters whose uid is not in arr
+func remove_not_in(arr:PoolStringArray):
 	for n in $characters.get_children():
 		if n is Character and not (n.unique_id in arr ):
 			n.call_deferred('free')

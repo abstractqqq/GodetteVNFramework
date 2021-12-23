@@ -1,7 +1,7 @@
 tool
 extends EditorPlugin
 
-var editor_path = preload("res://addons/ActorEditor/actorEditor.tscn")
+var editor_path:PackedScene = preload("res://addons/ActorEditor/actorEditor.tscn")
 var editor_instance
 
 func _enter_tree():
@@ -9,9 +9,6 @@ func _enter_tree():
 	get_editor_interface().get_editor_viewport().add_child(editor_instance)
 	editor_instance.parent = self
 	make_visible(false)
-
-func test():
-	print('abc')
 
 func _exit_tree():
 	if editor_instance:

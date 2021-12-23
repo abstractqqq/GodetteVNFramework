@@ -4,7 +4,7 @@ extends Node
 # Utilities node.
 
 # A collection of utility functions
-var rng = RandomNumberGenerator.new()
+var rng:RandomNumberGenerator = RandomNumberGenerator.new()
 #-------------------------------------------------------------------------
 # Premade event sections:
 # What are premade events? If you have an event like
@@ -13,7 +13,7 @@ var rng = RandomNumberGenerator.new()
 # into an premade event putting it here with a unique key so that you
 # can retrieve it anytime without typing all the commands. All you need 
 # to type is that {premade: your_name_for_the_event }
-var premade_events = {
+var premade_events:Dictionary = {
 	"EXAMPLE" : {"" : "Hello World!"},
 }
 
@@ -52,10 +52,10 @@ func movement_type(type:String)-> int:
 func calculate(what:String):
 	# what means what to calculate, should be an algebraic expression
 	# only dvars are allowed
-	var calculator:DvarCalculator = DvarCalculator.new()
-	var result = calculator.calculate(what)
-	calculator.call_deferred('free')
-	return result
+	var c:DvarCalculator = DvarCalculator.new()
+	var res : float = c.calculate(what)
+	c.call_deferred('free')
+	return res
 
 #----------------------------------------------------------------------
 # creates an after image. Used for fadeout effects / other fancy effects
@@ -63,7 +63,6 @@ func calculate(what:String):
 func after_image(pos:Vector2, scale:Vector2, m:Color, fliph:bool, flipv:bool, deg:float, texture:Texture, ft:float,z:int,to_free:Node=null):
 	if to_free: # if a to_free node is give, this node will be freed. Used in character fadeout.
 		to_free.call_deferred('free')
-	
 	
 	var dummy:Sprite = Sprite.new()
 	dummy.z_index = z+1
@@ -78,9 +77,9 @@ func after_image(pos:Vector2, scale:Vector2, m:Color, fliph:bool, flipv:bool, de
 	stage.add_child(dummy)
 	var tween:OneShotTween = OneShotTween.new(dummy, "queue_free")
 	dummy.add_child(tween)
-	var _err = tween.interpolate_property(dummy, "modulate", m, Color(m.r, m.g, m.b, 0), ft,
+	var _e:int = tween.interpolate_property(dummy, "modulate", m, Color(m.r, m.g, m.b, 0), ft,
 		Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
-	_err = tween.start()
+	_e = tween.start()
 
 #----------------------------------------------------------------------
 # Make a save.
@@ -185,8 +184,8 @@ func MarkUp(words:String):
 	var output:String = ''
 	var i:int = 0
 	while i < leng:
-		var c = words[i]
-		var inner = ""
+		var c:String = words[i]
+		var inner:String = ""
 		if c == '[':
 			i += 1
 			while words[i] != ']':

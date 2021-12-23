@@ -13,13 +13,7 @@ var sc:Vector2 = Vector2(1,1)
 var found:bool = false
 var _ready_to_generate:bool = false
 
-var parent:Node
-
-#var counter = 0
-#var speed = 30
-#var displacement = Vector2()
-#var sp = null
-
+var parent # set in actor plugin
 
 func _on_Button_pressed():
 	$hbox/editOptions/assetInfo/spriteInfo/spriteOptions.clear()
@@ -33,7 +27,7 @@ func _on_Button_pressed():
 	anim_dict.clear()
 	# Expression data
 	var index:int = -1
-	var exp_list:PoolStringArray = _get_chara_sprites(cur_uid)
+	var exp_list:Array = _get_chara_sprites(cur_uid)
 	for i in range(exp_list.size()):
 		var temp:String = exp_list[i].split(".")[0].split("_")[1]
 		temp_dict[temp] = exp_list[i]
@@ -51,7 +45,7 @@ func _on_Button_pressed():
 		
 	$hbox/editOptions/assetInfo/spriteInfo/spriteOptions.select(index)
 	
-	var anim_lists:PoolStringArray = _get_chara_sprites(cur_uid, "anim")
+	var anim_lists:Array = _get_chara_sprites(cur_uid, "anim")
 	for e in anim_lists:
 		var t:PoolStringArray = e.split(".")[0].split("_")
 		anim_dict[t[1]] = e
@@ -63,7 +57,6 @@ func _fail_to_find():
 	found = false
 	$hbox/editOptions/assetInfo/spriteInfo/spriteOptions.clear()
 	$hbox/preview.texture = null
-	
 
 func _on_generateButton_pressed():
 	if found == false: return
@@ -116,11 +109,11 @@ func _on_charaGenPopup_confirmed():
 
 # -------------------------------------------------------------------------
 
-func _get_chara_sprites(uid, which = "sprite")->PoolStringArray:
+func _get_chara_sprites(uid, which = "sprite")->Array:
 	# This method should only be used in development phase.
 	# The exported project won't work with dir calls depending on
 	# what kind of paths are passed.
-	var sprites:PoolStringArray = PoolStringArray([])
+	var sprites:Array = []
 	var dir:Directory = Directory.new()
 	if which in ['anim','animation','spritesheet']:
 		which = "res://assets/actors/spritesheet/"

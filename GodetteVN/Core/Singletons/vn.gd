@@ -36,17 +36,16 @@ const SKIP_SPEED:int = 3 # 3 means 1 left-click per 3 * 0.05 = 0.15 s
 
 # Transitions
 const TRANSITIONS_DIR:String = "res://GodetteVN/Core/_Details/Transition_Data/"
-const TRANSITIONS = ['fade','sweep_left','sweep_right','sweep_up','sweep_down',
+const TRANSITIONS:Array = ['fade','sweep_left','sweep_right','sweep_up','sweep_down',
 	'curtain_left','curtain_right','pixelate','diagonal']
-const PHYSICAL_TRANSITIONS = []
+const PHYSICAL_TRANSITIONS:Array = []
 
 # Other constants used throughout the engine
 const DIRECTION:Dictionary = {'up': Vector2.UP, 'down': Vector2.DOWN, 'left': Vector2.LEFT, 'right': Vector2.RIGHT}
 # Bad names for dvar
-const BAD_NAMES = PoolStringArray(["nw", "nl", "sm", 'dc','color', 'true', 'false'])
+var BAD_NAMES:Dictionary = {"nl":true, "sm":true, 'dc':true,'color':true, 'true':true, 'false':true}
 # Bad uids for characters
-const BAD_UIDS:PoolStringArray = PoolStringArray(['all', '', 'voice', 'speed','_', 'wait'])
-
+var BAD_UIDS:Dictionary = {'all':true, '':true, 'voice':true, 'speed':true,'_':true, 'wait':true}
 
 # --------------------------- Other Game Variables ------------------------
 # Need refactor

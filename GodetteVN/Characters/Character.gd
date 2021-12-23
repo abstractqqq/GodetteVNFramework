@@ -47,8 +47,7 @@ func change_expression(e : String, in_fadein:bool=false) -> bool:
 		return false
 
 func change_scale(sc:Vector2, t:float, type:String="linear"):
-	sc.x = max(abs(sc.x), sc.x)
-	sc.y = max(abs(sc.y), sc.y)
+	sc = Vector2(abs(sc.x), abs(sc.y))
 	var tween:OneShotTween = OneShotTween.new()
 	var _e = tween.interpolate_property(self,'scale',self.scale, sc,t,\
 		vn.Utils.movement_type(type), Tween.EASE_IN_OUT)
@@ -56,14 +55,11 @@ func change_scale(sc:Vector2, t:float, type:String="linear"):
 	_e = tween.start()
 
 func shake(amount: float, time : float, mode = 0):
-	# 0 : regular shake
-	# 1 : vpunch
-	# 2 : hpunch
+	# 0 : regular shake, 1 : vpunch, 2 : hpunch
 	var _objTimer:ObjectTimer = ObjectTimer.new(self,time,0.02,"_shake_action", [mode,amount])
 	add_child(_objTimer)
 	
-func _shake_action(params):
-	# params[0] = mode, params[1] = amount
+func _shake_action(params): # params[0] = mode, params[1] = amount
 	match params[0]:
 		0:position = loc + 0.02*MyUtils.random_vec(Vector2(-params[1],params[1]), Vector2(-params[1],params[1]))
 		1:position = loc + 0.02*Vector2(loc.x, MyUtils.random_num(-params[1],params[1]))
@@ -82,7 +78,6 @@ func _jump_action(params):
 		position -= params[1] * params[0]
 	else:
 		position += params[1] * params[0]
-
 
 func fadein(time : float, expression:String=""):
 	var _e:bool = change_expression(expression, true)

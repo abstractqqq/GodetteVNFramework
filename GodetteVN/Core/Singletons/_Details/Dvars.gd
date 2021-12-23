@@ -24,4 +24,5 @@ func dvar_initialization():
 		else:
 			vn.dvar[n] = $RegisteredDvars.get(n)
 	
+	vn.BAD_NAMES.clear() # Not used anymore
 	print("Intialized all dvars.")

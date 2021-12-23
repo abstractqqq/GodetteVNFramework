@@ -26,12 +26,8 @@ const all_weathers:Dictionary = {
 func _ready(): # turn off everything on ready
 	clean_up()
 	
-func weather_off():
-	for n in $weather.get_children():
-		n.call_deferred('free')
-	
 func show_weather(w_name:String):
-	weather_off() # Weather is exclusive
+	MyUtils.free_children($weather) # Weather is exclusive
 	var w:Node = get_node("weather")
 	if all_weathers.has(w_name):
 		w.add_child(load(all_weathers[w_name]).instance())
@@ -94,7 +90,7 @@ func reset():
 		
 func clean_up():
 	removeLasting()
-	weather_off()
+	MyUtils.free_children($weather)
 
 ### eh's Public Methods --------------------------------------------------------------------------------
 
@@ -271,7 +267,6 @@ func _get_transition_data() -> eh_TransitionData:
 		return _casted_transition_data
 	else:
 		return null
-
 
 func _raise_multiple_transition_error() -> void:
 	push_error("A new transition is being called while another one is playing")
