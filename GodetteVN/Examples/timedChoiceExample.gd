@@ -36,7 +36,6 @@ var main_block = [
 	{"female": "What should I eat today?", 'choice' : 'food', 'id':0},
 	{'sys':'QM on'}, # if sushi is chosen, QM is still on, so turn this on
 	# if out of time, then QM is turned on in out_of_time block, same with fried rice.
-	 
 	{"female": "It's quite easy, right?"},
 	{"female": "There are some technical details you need to consider, like whether you should disable save or hide quick menu."},
 	{"female":"But otherwise, it is pretty straight forward."},

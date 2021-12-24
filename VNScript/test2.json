@@ -28,7 +28,7 @@
 				]
 			},
 			{
-				"female": "Hello there. Let me introduce you to the system",
+				"female": "Hello there. Let me introduce you to the system.",
 				"voice": "001.wav"
 			},
 			{
@@ -162,6 +162,12 @@
 			},
 			{
 				"female": "That scared me"
+			},
+			{
+				"chara": "female move",
+				"loc": "400 600",
+				"time": 1,
+				"type":"cubic"
 			},
 			{
 				"chara": "test2 fadein",

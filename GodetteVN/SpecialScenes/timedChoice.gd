@@ -63,7 +63,7 @@ func _do(_params):
 		var par:Node = get_parent()
 		
 		# false is needed if you do not want your choice to be rolled back
-		par.on_choice_made({'then':'out_of_time'} , true)
+		par.on_choice_made({'then':'out_of_time'} , false)
 		# If you want to go to another scene, like YOU FAILED SCENE, you can use directly
 		# get_tree().change_scene_to() here
 		

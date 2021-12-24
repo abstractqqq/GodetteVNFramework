@@ -69,7 +69,7 @@ func _input(ev:InputEvent):
 			_refresh_script()
 			return
 	
-	if ev.is_action_pressed('vn_rollback') and (waiting_acc or idle) and not (vn.inSetting or\
+	if ev.is_action_pressed('vn_rollback') and (waiting_acc or idle or waiting_cho) and not (vn.inSetting or\
 		vn.inNotif or vn.skipping ) and allow_rollback:
 		on_rollback()
 			

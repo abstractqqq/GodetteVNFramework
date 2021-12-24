@@ -86,6 +86,7 @@ func camera_move(ev:Dictionary) -> void:
 	var off:Vector2
 	if ev.has('loc'):
 		off = ev['loc']
+		target_offset = off
 		vn.Pgs.playback_events['camera'] = {'zoom':target_zoom, 'offset':target_offset,\
 			'deg':target_degree}
 		if vn.skipping or mode == "instant": 

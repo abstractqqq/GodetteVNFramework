@@ -6,10 +6,10 @@ var choice_action = null
 
 func setup_choice(text:String, ev:Dictionary, infer_chosen:bool=false):
 	setup_choice_event(text,ev)
-	var cur_sc = vn.Pgs.currentNodePath
+	var cur_sc:String = vn.Pgs.currentNodePath
 	if infer_chosen and vn.Files.system_data.has(cur_sc):
-		var cur_bl = vn.Pgs.currentBlock
-		var cur_idx = vn.Pgs.currentIndex
+		var cur_bl:String = vn.Pgs.currentBlock
+		var cur_idx:int = vn.Pgs.currentIndex
 		match ev:
 			{'then',..}:
 				cur_bl = ev['then']
