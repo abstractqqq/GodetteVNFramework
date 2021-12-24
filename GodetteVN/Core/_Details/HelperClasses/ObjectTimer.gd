@@ -1,11 +1,11 @@
 extends Timer
 class_name ObjectTimer
 
-signal call_func(params)
-
 var _counter:int = 0
 var _total:float = 1
 var _params = null
+var _par
+var _func : String
 
 # This var means whether params should include counter and total
 # Counter will be at the position size() - 2 of params, and total
@@ -27,15 +27,15 @@ func _init(par:Node, total_time:float, interval:float, func_name:String, params:
 		_include = true
 		_params.push_back(_counter)
 		_params.push_back(_total)
-	var _e:int = self.connect("call_func", par, func_name)
-	_e = self.connect("timeout", self, "_timeout")
+	_par = par
+	_func = func_name
+	var _e : int = self.connect("timeout", self, "_timeout")
 	autostart = true
 
 func _timeout():
 	_counter += 1
 	if _include: _params[_params.size()-2] = _counter
-	if _counter >= _total:
-		emit_signal("call_func", _params)
+	if _counter > _total or not is_instance_valid(_par):
 		queue_free()
 	else:
-		emit_signal("call_func", _params)
+		_par.call(_func, _params)

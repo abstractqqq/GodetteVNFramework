@@ -30,7 +30,7 @@ func _on_newDialogButton_pressed():
 	return d
 	
 func _new_dialog_block(dname:String, content:String):
-	var d:Node = _on_newDialogButton_pressed()
+	var d = _on_newDialogButton_pressed()
 	d.set_block_name(dname)
 	d.set_content(content)
 	if dname == "starter":

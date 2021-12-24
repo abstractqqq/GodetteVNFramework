@@ -1,7 +1,7 @@
 extends CanvasLayer
 
-const notifList:PoolStringArray = PoolStringArray(["quit", "main", "override",\
-	'rollback', 'make_save'])
+const notifList:Dictionary = {"quit":true, "main":true, "override":true, 'rollback':true,\
+	'make_save':true}
 
 
 func clear():

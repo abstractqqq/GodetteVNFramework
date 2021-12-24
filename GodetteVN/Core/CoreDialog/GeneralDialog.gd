@@ -63,17 +63,22 @@ func _ready():
 func set_bg_path(node_path:String):
 	bg = get_node(node_path)
 	
-func _input(ev):
-	if ev.is_action_pressed('vn_rollback') and (waiting_acc or idle) and not vn.inSetting \
-	and not vn.inNotif and not vn.skipping and allow_rollback:
+func _input(ev:InputEvent):
+	if ev.is_action_pressed('vn_refresh') and not (OS.has_feature('standalone') \
+		or vn.inNotif or vn.skipping or vn.inSetting):
+			_refresh_script()
+			return
+	
+	if ev.is_action_pressed('vn_rollback') and (waiting_acc or idle) and not (vn.inSetting or\
+		vn.inNotif or vn.skipping ) and allow_rollback:
 		on_rollback()
 			
-	if ev.is_action_pressed('vn_upscroll') and not vn.inSetting and not vn.inNotif and not no_scroll:
+	if ev.is_action_pressed('vn_upscroll') and not (vn.inSetting or vn.inNotif or no_scroll):
 		QM.on_historyButton_pressed() # bad name... but lol
 		return
 	# QM hiding means that quick menu is being hidden. If that is the case,
 	# then the user probably wants to disable access to main menu too.
-	if ev.is_action_pressed('ui_cancel') and not vn.inSetting and not vn.inNotif and not QM.hiding:
+	if ev.is_action_pressed('ui_cancel') and not (vn.inSetting or vn.inNotif or QM.hiding):
 		add_child(vn.MAIN_MENU.instance())
 		return
 	
@@ -82,7 +87,7 @@ func _input(ev):
 		# In a choice event, game resumes only when a choice button is selected.
 		return
 		
-	if ev.is_action_pressed('vn_cancel') and not vn.inNotif and not vn.inSetting and not no_right_click:
+	if ev.is_action_pressed('vn_cancel') and not (vn.inNotif or vn.inSetting or no_right_click):
 		hide_UI()
 
 	# Can I simplify this?
@@ -95,12 +100,12 @@ func _input(ev):
 				if not vn.noMouse:
 					QM.reset_auto_skip()
 			else:
-				if not vn.noMouse and not vn.inNotif and not vn.inSetting:
+				if not (vn.noMouse or vn.inNotif or vn.inSetting):
 					check_dialog()
 		else: # not mouse
 			if vn.auto_on or vn.skipping:
 				QM.reset_auto_skip()
-			if not vn.inNotif and not vn.inSetting:
+			if not (vn.inNotif or vn.inSetting):
 				check_dialog()
 	
 #--------------------------------- Interpretor ----------------------------------
@@ -133,7 +138,7 @@ func interpret_events(event):
 		0: conditional_branch(ev)
 		1:
 			if check_condition(ev['condition']):
-				var _err = ev.erase('condition')
+				var _e:bool = ev.erase('condition')
 				continue
 			else: auto_load_next()
 		2: screen_effects(ev)
@@ -178,13 +183,10 @@ func auto_start(start_block:String="starter", start_id=null):
 		return false
 	else:
 		var dialog_data = vn.Files.load_json(dialog_json)
-		if dialog_data.has('Dialogs') and dialog_data.has('Choices'):
-			if dialog_data.has('Conditions'):
-				start_scene(dialog_data['Dialogs'],dialog_data['Choices'],dialog_data['Conditions'], load_instr,\
-					start_block, start_id)
-			else:
-				start_scene(dialog_data['Dialogs'],dialog_data['Choices'],{}, load_instr,\
-					start_block, start_id)
+		if dialog_data.has_all(['Dialogs', 'Choices']):
+			var cond:Dictionary = _u.has_or_default(dialog_data,'Conditions',{})
+			start_scene(dialog_data['Dialogs'],dialog_data['Choices'],cond, load_instr,\
+				start_block, start_id)
 			return true
 		else:
 			print("Dialog json file must contain 'Dialogs' and 'Choices' (even if empty).")
@@ -203,6 +205,9 @@ func start_scene(blocks : Dictionary, choices: Dictionary, conditions: Dictionar
 	# being any type of boolean expression that can be evaludated by the system. 
 	
 	vn.Scene = self
+	all_blocks.clear()
+	all_choices.clear()
+	all_conditions.clear()
 	get_tree().set_auto_accept_quit(false)
 	vn.Pgs.currentSaveDesc = scene_description
 	vn.Pgs.currentNodePath = get_tree().current_scene.filename
@@ -246,12 +251,12 @@ func auto_load_next(forw:bool=true):
 #------------------------ Related to Dialog Progression ------------------------
 func set_nvl(ev: Dictionary, auto_forw = true):
 	if typeof(ev['nvl']) == TYPE_BOOL:
-		self.nvl = ev['nvl']
-		if self.nvl: nvl_on(_u.has_or_default(ev,'font',''))
+		if ev['nvl']: nvl_on(_u.has_or_default(ev,'font',''))
 		else: nvl_off()
 		auto_load_next(auto_forw)
 	elif ev['nvl'] == 'clear':
-		cur_db.queue_free()
+		cur_db.text = ''
+		vn.Pgs.nvl_text = ""
 		auto_load_next(auto_forw)
 	else:
 		print("!!! Wrong nvl event format : %s" %ev)
@@ -578,7 +583,7 @@ func set_dvar(ev : Dictionary) -> void:
 			vn.dvar[left] = right
 		else:
 			var result = vn.Utils.read(right)
-			if result: # result not null
+			if result: # right is a string, and returned false
 				vn.dvar[left] = result
 			else:
 				match sep:
@@ -919,7 +924,7 @@ func on_rollback():
 	vn.Pgs.currentSaveDesc = last['currentSaveDesc']
 	vn.Pgs.currentIndex = last['currentIndex']
 	vn.Pgs.currentBlock = last['currentBlock']
-	vn.Pgs.playback_events = last['playback']	
+	vn.Pgs.playback_events = last['playback']
 	vn.Chs.chara_name_patch = last['name_patches']
 	vn.Chs.patch_display_names()
 	current_index = vn.Pgs.currentIndex
@@ -1025,12 +1030,11 @@ func nvl_off():
 	show_boxes()
 	if self.nvl:
 		cur_db.queue_free()
-		print($VNUI.get_children())
 		cur_db = $VNUI/dialogBox/dialogBoxCore
 		get_node('background').modulate = Color(1,1,1,1)
 		stage.set_modulate_4_all(Color(0.86,0.86,0.86,1))
-	self.nvl = false
-	self.centered = false
+		self.nvl = false
+		self.centered = false
 
 func nvl_on(center_font:String=''):
 	stage.set_modulate_4_all(vn.DIM)
@@ -1038,6 +1042,7 @@ func nvl_on(center_font:String=''):
 	hide_boxes()
 	cur_db = load(nvl_screen).instance()
 	var _err:int = cur_db.connect('load_next', self, 'check_dialog')
+	self.nvl = true
 	$VNUI.add_child(cur_db)
 	if centered:
 		cur_db.center_mode()
@@ -1048,7 +1053,6 @@ func nvl_on(center_font:String=''):
 	else:
 		get_node('background').modulate = vn.NVL_DIM
 		stage.set_modulate_4_all(vn.NVL_DIM)
-	self.nvl = true
 
 func hide_UI(show:bool=false):
 	if show:
@@ -1331,3 +1335,67 @@ func preprocess(words : String) -> String:
 func _exit_tree():
 	vn.Scene = null
 	vn.Files.write_to_config()
+	
+#-------------------------------------------------------------------------------
+# Only works in editor, not in exported game.
+func _refresh_script():
+	if dialog_json != '' and (waiting_acc or waiting_cho):
+		if allow_rollback:
+			var new_data = vn.Files.load_json(dialog_json)
+			if new_data.has_all(['Dialogs', 'Choices']):
+				print("!!! All rollback records not in this block 'slice' will be removed.")
+				vn.Pgs.remove_nonmatch_records()
+				var d_blocks:Dictionary = new_data['Dialogs']
+				# Check if current is still a dialog event in new script.
+				if vn.event_reader(d_blocks[vn.Pgs.currentBlock][vn.Pgs.currentIndex]) != -1:
+					print("!!! Refresh failed.")
+					print("!!! It seems like you added or removed some events. "+\
+						"You will have to restart the game to see the changes.")
+					print("!!! This functionality is only intended for checking adjustments for "+\
+						"existing events. Adding or removing may cause side effects.")
+					return
+				# Check if all available rollback record indices corersponds to 
+				# dialogs in new script. If not, that means some new events got
+				# injected and for safety reasons, don't allow refresh. 
+				for ev in vn.Pgs.rollback_records:
+					var bname:String = ev['currentBlock']
+					var idx:int = ev['currentIndex']
+					var ev_type:int = vn.event_reader(d_blocks[bname][idx])
+					if ev_type == 1:
+						var double_check:Dictionary = d_blocks[bname][idx].duplicate()
+						var _e : bool = double_check.erase('condition')
+						if vn.event_reader(double_check) == -1:
+							continue 
+					if ev_type != -1:
+						print("!!! Refresh failed.")
+						print("!!! It seems like you added or removed some events. "+\
+							"You will have to restart the game to see the changes.")
+						print("!!! This functionality is only intended for checking adjustments for "+\
+							"existing events. Adding or removing may cause side effects.")
+						return
+						
+				# Clears all the basic checks.
+				waiting_cho = false
+				waiting_acc = false
+				vn.Pgs.update_playback()
+				stage.character_leave('absolute_all')
+				print(d_blocks[vn.Pgs.currentBlock][vn.Pgs.currentIndex])
+				vn.Pgs.history.clear()
+				_u.free_children(choiceContainer)
+				generate_nullify()
+				var cond:Dictionary = _u.has_or_default(new_data,'Conditions',{})
+				start_scene(d_blocks, new_data['Choices'], cond, 'load_game',\
+					vn.Pgs.currentBlock, vn.Pgs.currentIndex)
+				print("!!! Refresh success.") 
+				print("!!! History is cleaned because this functionality "+\
+					"should only be used in a test setting.")
+				
+			else:
+				print("!!! Refresh failed.")
+				print("Dialog json file must contain 'Dialogs' and 'Choices' (even if empty).")
+		else:
+			print("!!! Refresh failed.")
+			print("!!! This feature only works when allow_rollback is set to true.")
+			print("!!! This is to prevent breaking the game by loading an updated script.")
+		
+	

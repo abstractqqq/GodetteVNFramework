@@ -1,6 +1,6 @@
 # GodetteVN, A Visual Novel Framework for Godot Users
 
-## I am focusing on making a game with this rn. No update planned unless it's a bug.
+## I am focusing on making a game with this rn. No update planned unless it's a bug. I lied. A few more updates before I jump into my own game!
 
 ![Godette](/Showcases/show1.png)
 
@@ -82,6 +82,7 @@ More in the making ~
 2. right click : hide VN related UI (dialog box, name box, quick menu) and only show sprites and background
 3. control + z : rollback to previous dialog
 4. Tab (only in script editor) : generates the ":: ;" string for you. When you have selected text which corresponds to some events, then it will try to generate the event text for you. For instance, if you have selected "a join", it will be interpreted as "there exists a character with uid a, and is joining the scene" and will print "chara:: a join; loc :: * ; expression :: default ;" for you in the script editor.
+5. Control + F : reloads the game script it the json file has been modified and saved. Only works when game is launched in the editor and when dialog is passed as a json.
 
 ### Exporting your game
 

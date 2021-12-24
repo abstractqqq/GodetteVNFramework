@@ -128,8 +128,7 @@ func gather_save_data():
 	var datetime:String = dt['month'] + "/" + dt['day'] + "/" + dt['year'] + \
 	",  " + dt['hour'] + ":" + dt['minute'] + ':' + dt['second']
 	# Actual save
-	vn.Pgs.get_latest_nvl() # get current nvl text.
-	vn.Pgs.get_latest_onstage() # get current on stage characters.
+	vn.Pgs.update_playback()
 	var data:Dictionary = {'currentNodePath':vn.Pgs.currentNodePath, 'currentBlock': vn.Pgs.currentBlock,\
 	'currentIndex': vn.Pgs.currentIndex, 'thumbnail': latest_thumbnail(),\
 	'currentSaveDesc': vn.Pgs.currentSaveDesc, 'history':vn.Pgs.history,\
@@ -212,11 +211,10 @@ func MarkUp(words:String):
 #---------------------------------------------------------------------
 # read the input and try to understand it
 func read(s, json:bool=false):
-	var type = typeof(s)
-	if type == TYPE_STRING:
-		if json:
-			pass
-		else:
+	if json:
+		return
+	match typeof(s):
+		TYPE_STRING:
 			var lower = s.to_lower()
 			if lower == "true":
 				return true
@@ -228,13 +226,13 @@ func read(s, json:bool=false):
 				return float(s)
 			else:
 				return false
-	elif type == TYPE_ARRAY:
-		for i in range(s.size()):
-			if vn.dvar.has(s[i]):
-				s[i] = vn.dvar[s[i]]
-		return s
-	else:
-		return s
+		TYPE_ARRAY:
+			for i in range(s.size()):
+				if vn.dvar.has(s[i]):
+					s[i] = vn.dvar[s[i]]
+			return s
+		_:
+			return s
 
 #---------------------------------------------------------------------
 # Used if you only want your parameters to be between 0 and 1.

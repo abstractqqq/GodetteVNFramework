@@ -53,9 +53,9 @@ func _on_yesButton_pressed():
 			screen.clean_up()
 			music.stop_bgm()
 			vn.Pgs.resetPlayback()
+			vn.Pgs.history.clear()
 			vn.dvar_initialization()
 			stage.clean_up()
-			#----------------------------------------
 			if get_tree().change_scene(vn.ROOT_DIR + vn.title_screen_path) == OK:
 				vn.reset_states()
 		"override":

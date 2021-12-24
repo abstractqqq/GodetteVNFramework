@@ -22,6 +22,10 @@ var _fading:bool = false
 # Character attributes
 var loc:Vector2 = Vector2()
 var current_expression : String = ""
+# --- only used in some actions... Would like to get rid of, but can't find
+# alternative rn.
+var _fake
+var _objTimer
 
 #-------------------------------------------------------------------------------
 
@@ -54,10 +58,10 @@ func change_scale(sc:Vector2, t:float, type:String="linear"):
 	add_child(tween)
 	_e = tween.start()
 
-func shake(amount: float, time : float, mode = 0):
+func shake(amount: float, time : float, mode : int = 0):
 	# 0 : regular shake, 1 : vpunch, 2 : hpunch
-	var _objTimer:ObjectTimer = ObjectTimer.new(self,time,0.02,"_shake_action", [mode,amount])
-	add_child(_objTimer)
+	var _obj:ObjectTimer = ObjectTimer.new(self,time,0.02,"_shake_action", [mode,amount])
+	add_child(_obj)
 	
 func _shake_action(params): # params[0] = mode, params[1] = amount
 	match params[0]:
@@ -68,8 +72,8 @@ func _shake_action(params): # params[0] = mode, params[1] = amount
 # Is there a better way? If I use tween, then position will be locked, and bad news.
 func jump(direc:Vector2, amount:float, time:float):
 	var step : float = amount/(time/0.04)
-	var _objTimer:ObjectTimer = ObjectTimer.new(self,time,0.02,"_jump_action", [direc,step], true)
-	add_child(_objTimer)
+	var _obj:ObjectTimer = ObjectTimer.new(self,time,0.02,"_jump_action", [direc,step], true)
+	add_child(_obj)
 
 func _jump_action(params):
 	# params[0] = jump_dir, params[1] = step_size, params[-1] = total_counts, params[-2] = counter
@@ -110,27 +114,31 @@ func _dummy_fadeout(expFrames:SpriteFrames, prev_exp:String):
 # Don't ask why this code looks awkward. Ask what Godot does when multiple
 # tweens are changing the same property.
 func change_pos_2(loca:Vector2, time:float, type:String="linear", expr:String=''):
+	if is_instance_valid(_fake):
+		_fake.queue_free()
+		_objTimer.queue_free()
+		self.position = loc 
+		
 	self.loc = loca
 	var m:int = vn.Utils.movement_type(type)
-	var fake:FakeWalker = FakeWalker.new()
-	fake.position = position
-	stage.add_child(fake)
+	_fake = FakeWalker.new()
+	_fake.position = position
+	stage.add_child(_fake)
 	var fake_tween:OneShotTween
 	if expr == '':
-		fake_tween = OneShotTween.new(fake,"queue_free",[])
+		fake_tween = OneShotTween.new(_fake,"queue_free",[])
 	else:
 		fake_tween = OneShotTween.new(self,"change_expression",[expr])
-		var _err:int = fake_tween.connect("tween_all_completed", fake, "queue_free")
-	fake.add_child(fake_tween)
-	var _e:bool = fake_tween.interpolate_property(fake,"position",position,loca,time,m,Tween.EASE_IN_OUT)
-	var _objTimer:ObjectTimer = ObjectTimer.new(self,time,0.01,"_follow_fake",[fake])
+		var _err:int = fake_tween.connect("tween_all_completed", _fake, "queue_free")
+	_fake.add_child(fake_tween)
+	var _e:bool = fake_tween.interpolate_property(_fake,"position",position,loca,time,m,Tween.EASE_IN_OUT)
+	_objTimer = ObjectTimer.new(self,time,0.01,"_follow_fake",[])
 	add_child(_objTimer)
 	_e = fake_tween.start()
 
-func _follow_fake(params):
-	var fake = params[0]
-	if is_instance_valid(fake):
-		position += fake.get_disp()
+func _follow_fake(_params):
+	if is_instance_valid(_fake):
+		position += _fake.get_disp()
 
 func is_fading():
 	return _fading

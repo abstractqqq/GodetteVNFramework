@@ -5,6 +5,7 @@ extends Node
 # Constants
 const max_history_size:int = 300 # Max number of history entries
 const max_rollback_steps:int = 50 # Max steps of rollback to keep
+const max_save_count:int = 50 # Max number of saves a player can make
 # It is recommended that max_rollback_steps is kept to a small number, 
 # except in testing.
 const voice_to_history:bool = true # Should voice be replayable in history?

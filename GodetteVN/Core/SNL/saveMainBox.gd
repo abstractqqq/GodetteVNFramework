@@ -21,5 +21,5 @@ func _ready():
 
 func make_empty_save():
 	var newSlot:Node = vn.Pre.SAVE_SLOT.instance()
-	var _e = newSlot.connect("save_made", self, "make_empty_save")
+	var _e : int = newSlot.connect("save_made", self, "make_empty_save")
 	$allSaves.add_child(newSlot)

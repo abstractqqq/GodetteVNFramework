@@ -89,7 +89,7 @@
 				"screen": ""
 			},
 			{
-				"female": "Let me zoom the camera"
+				"female": "Let me zoom the camera..."
 			},
 			{
 				"camera": "zoom",
@@ -98,7 +98,7 @@
 				"time": 1
 			},
 			{
-				"female": "Let me move the camera"
+				"female": "Let me move the camera!"
 			},
 			{
 				"camera": "move",
@@ -117,7 +117,7 @@
 			},
 			{
 				"chara": "female move",
-				"loc": "600 600",
+				"loc": "1000 600",
 				"type": "cubic",
 				"time": 1
 			},
@@ -128,6 +128,10 @@
 				"weather": "rain"
 			},
 			{
+				"chara":"female move",
+				"loc": "300 600"
+			},
+			{
 				"female": "Wanna see something spooky?"
 			},
 			{
@@ -135,7 +139,7 @@
 				"scale": "1.5 1.5"
 			},
 			{
-				"female": "Cool?"
+				"female": "Cool!!!?"
 			},
 			{
 				"female": "You can turn this off just like how you turn off tint."

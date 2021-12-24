@@ -37,6 +37,9 @@ func get_latest_onstage():
 func get_latest_nvl():
 	playback_events['nvl'] = nvl_text
 
+func update_playback():
+	playback_events['nvl'] = nvl_text
+	playback_events['charas'] = stage.all_on_stage()
 
 #-------------------------------------------------------------------------------
 # "new_game" = start from new
@@ -76,11 +79,24 @@ func updateRollback():
 	'name_patches':vn.Chs.chara_name_patch.duplicate()}
 	rollback_records.push_back(rollback_data)
 	
+func remove_nonmatch_records(): # Read the comments carefully if you want to use this function.
+	# remove all rollback records that are not in current block.
+	# Will check from the end, and remove everything before the last entry
+	# to the current block. This means if we went from block A(1) to block B(2) and then
+	# to block A(3) and then to block B(4), only records that happened in (4)
+	# will be kept. 
+	var j:int = rollback_records.size()
+	var constant:int = j
+	for i in range(j):
+		if rollback_records[j-i-1]['currentBlock'] != currentBlock:
+			j = j - i - 1
+			break
+	if j < constant:
+		for _i in range(j):
+			rollback_records.remove(0)
 
 func checkSkippable()->bool:
 	if vn.Files.system_data.has(currentNodePath):
-		#print("Current index is %s" %game.currentIndex)
-		#print("Max index is %s" %fileRelated.system_data[game.currentNodePath][game.currentBlock])
 		if currentIndex > vn.Files.system_data[currentNodePath][currentBlock]:
 			return false
 	return true

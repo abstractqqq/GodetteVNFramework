@@ -137,7 +137,7 @@ func character_join(uid: String, ev:Dictionary):
 func character_add(uid:String, ev:Dictionary):
 	var pt_name:String 
 	var path:String 
-	if ev.has('path') and ev.has('at'):
+	if ev.has_all(['path', 'at']):
 		pt_name = ev['at']
 		path = vn.ROOT_DIR + ev['path']
 	else:
