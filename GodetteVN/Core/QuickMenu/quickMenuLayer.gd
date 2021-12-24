@@ -72,7 +72,7 @@ func enable_skip_auto():
 
 
 func _on_QsaveButton_pressed():
-	var flt = load(vn.DEFAULT_FLOAT).instance()
+	var flt = load("res://GodetteVN/Core/_Details/floatText.tscn").instance()
 	screen.add_child(flt)
 	flt.display("Quick save made.", 2, 0.5, Vector2(60,60), 'res://fonts/ARegular.tres')
 	vn.Utils.make_a_save("[Quick Save] ")

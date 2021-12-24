@@ -14,7 +14,8 @@
 			},
 			{
 				"bgm":"myuu-angels.mp3",
-				"fadein":3
+				"fadein":3,
+				"vol":-25
 			},
 			{
 				"female": "EEEEEE",
@@ -72,7 +73,7 @@
 				"dir": "right"
 			},
 			{
-				"female": "Let me tint the screen"
+				"female": "Let me tint the screen."
 			},
 			{
 				"screen": "tint",

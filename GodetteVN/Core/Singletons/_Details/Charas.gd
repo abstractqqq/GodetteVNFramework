@@ -15,6 +15,7 @@ func _ready():
 	# Maybe free, maybe not free?
 	$RegisteredCharacters.queue_free()
 	vn.BAD_UIDS.clear() # Not used anymore.
+	set_noname('vo')
 
 # Keep a record of the path to the scene of the stage character
 func stage_character(uid:String) -> void:

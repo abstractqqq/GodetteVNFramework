@@ -21,7 +21,6 @@ var main_block = [
 	{"screen":"fade in", 'time':1},
 	{'chara': "gt join", "loc": "1600 650"},
 	{"gt": "Here we demonstrate parallax background and show that it is compatible with all character actions."},
-	{"gt": "You can look at the top left corner to see the events controlling everything."},
 	{"express": "gt crya"},
 	{"gt": "This forest is a bit scary, isn't it?"},
 	{"chara": "gt shake","time":1},
