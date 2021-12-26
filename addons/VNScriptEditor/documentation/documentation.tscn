@@ -73,7 +73,6 @@ Any Godot builtin bbcode.
 [nl]: new line. If you're using GDscript to write events, not this editor, you can also use \"\\n\".
 [dc]: double colon. (Same. No need in GDscript.)
 [sm]: semicolon. (Same. No need in GDscript.)
-[nw]: autoforward to next dialog without delay
 [lb]: the left square bracket \"[\" (Same. No need in GDscript.)
 [rb]: the right square bracket \"]\" (Same. No need in GDscript.)
 [dvar_identifer]: puts the value of the dvar in the text
@@ -82,6 +81,12 @@ For example if you have a dvar called \"p_name\" for player_name, then put
 [color=#ff0000][center]a happy:: So your name is [p_name].;[/center][/color]
 
 will show the value which p_name refers to.
+
+If you are in ADV (Normal dialog mode), then you have some more special symbols:
+_: will take the time for a string character, but display nothing more. A empty character that takes times. The time it takes will be equal to 1/cps where cps(characters per second) is the optional speed field you provide in a dialog event.
+\\_: (\"\\\\_\" if you are typing in GDscript because you need to escape that \\. If you are already in JSON or using VNScript, there is no need for the extra \\) will display the actual underscore.
+%your_words%: will group the part inside the %'s together, and display all at once. The time this will wait is equal to len(your_words) * (1/cps).
+\\%: (Same escape rules apply) will show the actual percentage symbol.
 
 There will be more special tokens for more advanced features in the future.
 
@@ -208,6 +213,12 @@ For example if you have a dvar called \"p_name\" for player_name, then put
 a happy:: So your name is [p_name].;
 
 will show the value which p_name refers to.
+
+If you are in ADV (Normal dialog mode), then you have some more special symbols:
+_: will take the time for a string character, but display nothing more. A empty character that takes times. The time it takes will be equal to 1/cps where cps(characters per second) is the optional speed field you provide in a dialog event.
+\\_: (\"\\\\_\" if you are typing in GDscript because you need to escape that \\. If you are already in JSON or using VNScript, there is no need for the extra \\) will display the actual underscore.
+%your_words%: will group the part inside the %'s together, and display all at once. The time this will wait is equal to len(your_words) * (1/cps).
+\\%: (Same escape rules apply) will show the actual percentage symbol.
 
 There will be more special tokens for more advanced features in the future.
 

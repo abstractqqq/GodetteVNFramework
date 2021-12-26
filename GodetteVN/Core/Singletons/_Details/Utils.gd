@@ -4,7 +4,7 @@ extends Node
 # Utilities node.
 
 # A collection of utility functions
-var rng:RandomNumberGenerator = RandomNumberGenerator.new()
+var regex:RegEx = RegEx.new()
 #-------------------------------------------------------------------------
 # Premade event sections:
 # What are premade events? If you have an event like
@@ -233,6 +233,11 @@ func read(s, json:bool=false):
 			return s
 		_:
 			return s
+
+#---------------------------------------------------------------------
+func eliminate_special_symbols(s:String, pattern_to_kill:String, all:bool=true) -> String:
+	var _e:int = regex.compile(pattern_to_kill) # "(?<!\\\\)_")
+	return regex.sub(s, "", all)
 
 #---------------------------------------------------------------------
 # Used if you only want your parameters to be between 0 and 1.

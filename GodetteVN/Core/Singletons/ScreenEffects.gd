@@ -33,9 +33,7 @@ func show_weather(w_name:String):
 		w.add_child(load(all_weathers[w_name]).instance())
 
 func removeLasting():
-	for n in $lasting.get_children():
-		n.call_deferred('free')
-
+	MyUtils.free_children($lasting)
 
 func tint(c: Color,t : float):
 	removeLasting()

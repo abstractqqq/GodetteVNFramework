@@ -72,7 +72,8 @@ func _input(ev:InputEvent):
 	if ev.is_action_pressed('vn_rollback') and (waiting_acc or idle or waiting_cho) and not (vn.inSetting or\
 		vn.inNotif or vn.skipping ) and allow_rollback:
 		on_rollback()
-			
+		return
+		
 	if ev.is_action_pressed('vn_upscroll') and not (vn.inSetting or vn.inNotif or no_scroll):
 		QM.on_historyButton_pressed() # bad name... but lol
 		return
@@ -89,6 +90,7 @@ func _input(ev:InputEvent):
 		
 	if ev.is_action_pressed('vn_cancel') and not (vn.inNotif or vn.inSetting or no_right_click):
 		hide_UI()
+		return
 
 	# Can I simplify this?
 	if (ev.is_action_pressed("ui_accept") or ev.is_action_pressed('vn_accept')) and waiting_acc:
@@ -354,24 +356,26 @@ func generate_choices(ev: Dictionary):
 func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false,wt:float=0):
 	var uid:String = express(combine, false, true)
 	words = preprocess(words)
+	var t:String = vn.Utils.eliminate_special_symbols(words, "((?<!\\\\)_)|((?<!\\\\)%)")
+	t = t.replace("\\_", "_").replace("\\%", "%")
 	if vn.skipping: cps = 0.0
 	if self.nvl: # little awkward. But stable for now.
 		if just_loaded:
 			just_loaded = false
 			if centered:
-				cur_db.set_dialog(uid, words, cps, true)
+				cur_db.set_dialog(uid, words, cps, true, t)
 			else:
-				cur_db.visible_characters = cur_db.text.length()
+				cur_db.visible_characters = len(cur_db.text)
 		else:
 			if centered:
-				cur_db.set_dialog(uid, words, cps, true)
+				cur_db.set_dialog(uid, words, cps, true, t)
 				vn.Pgs.nvl_text = ''
 			else:
-				cur_db.set_dialog(uid, words, cps)
-				vn.Pgs.nvl_text = cur_db.get_text()
-			_voice_to_hist((latest_voice!='') and vn.voice_to_history, uid, cur_db.get_text())
+				cur_db.set_dialog(uid, words, cps, false, t)
+				vn.Pgs.nvl_text = cur_db.finalized_dialog
+			_voice_to_hist((latest_voice!='') and vn.voice_to_history, uid, t)
 	
-	else:
+	else: # Normal dialog / ADV
 		if not _hide_namebox(uid):
 			$VNUI.namebox_follow_chara(uid)
 			var info:Dictionary = vn.Chs.all_chara[uid]
@@ -387,18 +391,16 @@ func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false,w
 				cur_db.reset_fonts()
 		
 		if just_loaded:
-			cur_db.set_dialog(words)
+			cur_db.set_dialog(words, cps)
 			just_loaded = false
 		else:
 			cur_db.set_dialog(words, cps)
-			var new_text:String = cur_db.bbcode_text
-			_voice_to_hist((latest_voice!='') and vn.voice_to_history, uid, new_text)
-			vn.Pgs.playback_events['speech'] = new_text
+			vn.Pgs.playback_events['speech'] = t
+			_voice_to_hist((latest_voice!='') and vn.voice_to_history, uid, t)
 		
 		stage.set_highlight(uid)
 	
 	wait_for_accept(ques,wt)
-	# If this is a question, then displaying the text is all we need.
 
 func extend(ev:Dictionary):
 	# Cannot use extend with a choice, extend doesn't support font
@@ -426,7 +428,9 @@ func extend(ev:Dictionary):
 		if ev.has('speed'):
 			cps = _parse_speed(ev['speed'])
 		
-		_voice_to_hist(_check_latest_voice(ev) and vn.voice_to_history, prev_speaker, words)
+		var t:String = vn.Utils.eliminate_special_symbols(words, "((?<!\\\\)_)|((?<!\\\\)%)")
+		t = t.replace("\\_", "_").replace("\\%", "%")
+		_voice_to_hist(_check_latest_voice(ev) and vn.voice_to_history, prev_speaker, t)
 		if just_loaded:
 			just_loaded = false
 			cur_db.set_dialog(vn.Pgs.playback_events['speech'], vn.cps)
@@ -434,7 +438,7 @@ func extend(ev:Dictionary):
 		else:
 			cur_db.bbcode_text = vn.Pgs.playback_events['speech']
 			cur_db.set_dialog(words, cps, true)
-			vn.Pgs.playback_events['speech'] += " " + words
+			vn.Pgs.playback_events['speech'] += " " + t
 			
 		stage.set_highlight(prev_speaker)
 		# wait for accept
@@ -759,14 +763,13 @@ func express(combine : String, auto_forw:bool = true, ret_uid:bool = false):
 	if ret_uid: return uid
 
 #--------------------------------- Weather -------------------------------------
-func change_weather(we:String, auto_forw = true):
-	if !vn.inLoading:
-		screen.show_weather(we) # If given weather doesn't exist, nothing will happen
-		if we in ["", "off"]:
-			vn.Pgs.playback_events.erase('weather')
-		else:
-			vn.Pgs.playback_events['weather'] = {'weather':we}
-		auto_load_next(auto_forw)
+func change_weather(we:String, auto_forw:bool = true):
+	screen.show_weather(we) # If given weather doesn't exist, nothing will happen
+	if we in ["", "off"]:
+		vn.Pgs.playback_events.erase('weather')
+	else:
+		vn.Pgs.playback_events['weather'] = {'weather':we}
+	auto_load_next(auto_forw and !vn.inLoading)
 
 #--------------------------------- History -------------------------------------
 func history_manipulation(ev: Dictionary):
@@ -780,7 +783,7 @@ func history_manipulation(ev: Dictionary):
 		
 		for k in ev:
 			if k != 'history':
-				vn.Pgs.updateHistory(PoolStringArray([k, vn.Utils.MarkUp(ev[k])]))
+				vn.Pgs.updateHistory([k, vn.Utils.MarkUp(ev[k])])
 				break
 	elif what == "pop":
 		vn.Pgs.history.pop_back()
@@ -1309,6 +1312,7 @@ func preprocess(words : String) -> String:
 	var output:String = ''
 	var i:int = 0
 	while i < leng:
+		# Regular Parsing
 		var c:String = words[i]
 		var inner:String = ""
 		if c == '[':
@@ -1329,6 +1333,7 @@ func preprocess(words : String) -> String:
 					else: output += '[' + inner + ']'
 		else:
 			output += c
+
 		i += 1
 	return output
 	
@@ -1374,12 +1379,11 @@ func _refresh_script():
 							"existing events. Adding or removing may cause side effects.")
 						return
 						
-				# Clears all the basic checks.
+				# Passes all the basic checks.
 				waiting_cho = false
 				waiting_acc = false
-				vn.Pgs.update_playback()
+				vn.Pgs.update_playback() # What about in nvl mode?
 				stage.character_leave('absolute_all')
-				print(d_blocks[vn.Pgs.currentBlock][vn.Pgs.currentIndex])
 				vn.Pgs.history.clear()
 				_u.free_children(choiceContainer)
 				generate_nullify()

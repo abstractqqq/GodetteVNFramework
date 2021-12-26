@@ -1,11 +1,10 @@
 extends RichTextLabel
 
-# Same as dialog box
-onready var timer:Timer = $Timer
-
 var autoCounter:int = 0
 var skipCounter:int = 0
 var adding:bool = false
+var _grouping:bool = false
+var _groupSize:int = 0
 
 # center = nvl in disguise
 const default_size:Vector2 = Vector2(1100,800)
@@ -13,8 +12,7 @@ const default_pos:Vector2 = Vector2(410,50)
 const CENTER_SIZE:Vector2 = Vector2(1100,300)
 const CENTER_POS:Vector2 = Vector2(410,400)
 var last_uid:String = ''
-var new_dialog:String = ''
-
+var finalized_dialog:String = ''
 var _target_leng:int = 0
 
 signal load_next
@@ -22,12 +20,11 @@ signal all_visible
 
 func _ready():
 	var _err:int = vn.get_node("GlobalTimer").connect("timeout",self, "_on_global_timeout")
-	var sb = get_v_scroll()
+	var sb:VScrollBar = get_v_scroll()
 	_err = sb.connect("mouse_entered", vn.Utils, "no_mouse")
 	_err = sb.connect("mouse_exited", vn.Utils, "yes_mouse")
 
-func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name = false):
-	$Tween.remove(self,"visible_characters")
+func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name:bool = false, finalized:String=''):
 	if suppress_name: # if name should not be shown, as in the center case treat it as if it is the narrator
 		uid = ""
 	if (uid != last_uid):
@@ -38,7 +35,7 @@ func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name = fals
 		else:
 			var ch_info:Dictionary = vn.Chs.all_chara[uid]
 			var color:Color = MyUtils.has_or_default(ch_info,"name_color",Color.black)
-			var n = ch_info["display_name"]
+			var n:String = ch_info["display_name"]
 			var cstr:String = color.to_html(false)
 			if self.text == '':
 				self.bbcode_text += "[color=#" + cstr + "]" + n + ":[/color]\n"
@@ -48,36 +45,31 @@ func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name = fals
 	else:
 		self.bbcode_text += " "
 	
-	visible_characters = len(text)
-	new_dialog = words
+	visible_characters = text.length()
 	bbcode_text += words
-	_target_leng = len(text)
-	
-	if cps <= 0:
-		visible_characters = _target_leng
+	_target_leng = text.length()
+	finalized_dialog = bbcode_text + finalized
+	if cps <= 0: # finalized = text without the special escapes like \_ and \%
+		bbcode_text = finalized_dialog
+		visible_characters = -1
 		adding = false
 		return
 	
-	$Tween.interpolate_property(self,'visible_characters',visible_characters,\
-		_target_leng, float(_target_leng-visible_characters)/cps, Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
-	$Tween.start()
+	$Timer.wait_time = max(0.015, 1.0/cps)
+	$Timer.start()
 	adding = true
 	
-func _on_Timer_timeout():
-	pass
-	
 func force_finish():
-	$Tween.remove(self,"visible_characters")
-	visible_characters = _target_leng
-	adding = false
-	emit_signal("all_visible")
-
-func _on_Tween_tween_completed(object, key):
-	if key == ":visible_characters" and object == self:
+	if adding:
+		self.visible_characters = _target_leng
+		adding = false
+		$Timer.stop()
+		emit_signal("all_visible")
+	
+func _on_Timer_timeout():
+	visible_characters += 1
+	if visible_characters >= _target_leng:
 		force_finish()
-
-func get_text():
-	return self.new_dialog
 
 func center_mode():
 	self.rect_position = CENTER_POS
@@ -92,12 +84,11 @@ func queue_free():
 
 func _on_global_timeout():
 	if vn.skipping:
-		force_finish()
 		skipCounter = (skipCounter + 1)%(vn.SKIP_SPEED)
 		if skipCounter == 1:
 			emit_signal("load_next")
 	else:
-		if not adding and vn.auto_on and not MyUtils.has_job('auto_dialog_wait'): 
+		if !adding and vn.auto_on and !MyUtils.has_job('auto_dialog_wait'): 
 			autoCounter += 1
 			if autoCounter >= vn.auto_time * 20:
 				autoCounter = 0
