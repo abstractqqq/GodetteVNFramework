@@ -34,8 +34,8 @@ func _init(par:Node, total_time:float, interval:float, func_name:String, params:
 
 func _timeout():
 	_counter += 1
-	if _include: _params[_params.size()-2] = _counter
-	if _counter > _total or not is_instance_valid(_par):
+	if _include: _params[-2] = _counter
+	if _counter >= _total or not is_instance_valid(_par):
 		queue_free()
 	else:
 		_par.call(_func, _params)

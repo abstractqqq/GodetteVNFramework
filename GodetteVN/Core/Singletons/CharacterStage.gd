@@ -51,9 +51,16 @@ func character_spin(uid:String, ev:Dictionary):
 	if uid == 'all':
 		for n in $characters.get_children():
 			if n is Character and n.in_all:
-				n.spin(sdir,degrees, time, type)
+				if type == 'instant' or vn.skipping:
+					n.rotation_degrees = degrees
+				else:
+					n.spin(sdir,degrees, time, type)
 	else:
-		find_chara_on_stage(uid).spin(sdir,degrees,time,type)
+		var c:Character = find_chara_on_stage(uid)
+		if type == 'instant' or vn.skipping:
+			c.rotation_degrees = degrees
+		else:
+			c.spin(sdir,degrees,time,type)
 		
 func character_scale(uid:String, ev:Dictionary):
 	# Currently doesn't support all
@@ -209,7 +216,7 @@ func all_on_stage():
 	for n in $characters.get_children():
 		if n is Character:
 			output.append({"uid":n.unique_id, "expression":n.current_expression,\
-			'loc': n.loc, 'fliph':n.flip_h,'flipv':n.flip_v, 'scale':n.scale})
+			'loc': n.loc, 'deg': n.rotation_degrees, 'fliph':n.flip_h,'flipv':n.flip_v, 'scale':n.scale})
 	return output
 	
 func set_flip(uid:String, fliph:bool=false, flipv:bool=false):

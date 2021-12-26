@@ -4,7 +4,7 @@ extends RichTextLabel
 
 # Not implemented yet because I cannot find any resource
 # export(bool) var noise_on = false
-# export(String) var noise_file_path = ''
+export(String, FILE, "*.ogg") var beep_path = ''
 
 var autoCounter:int = 0
 var skipCounter:int = 0
@@ -12,6 +12,7 @@ var adding:bool = false
 var _target_leng:int = 0
 var _grouping:bool = false
 var _groupSize:int = 0 
+var _beep:bool = false
 
 # var eod_str:String = "[fade start=1 length=4]  >>>[/fade]"
 # var eod:bool = false
@@ -40,10 +41,10 @@ func set_chara_fonts(ev:Dictionary):
 		if ev[key] != '':
 			add_font_override(key, load(ev[key]))
 
-func set_dialog(words : String, cps:float = vn.cps, extend = false):
+func set_dialog(words : String, cps:float = vn.cps, extend:bool = false, beep:bool = false):
 	# words will be already preprocessed
 	#eod = false
-
+	_beep = beep and (beep_path != '')
 	if extend:
 		visible_characters = text.length()
 		bbcode_text += " " + words
@@ -116,9 +117,11 @@ func _on_Timer_timeout():
 func _add_visible(delay:bool = false):
 	if not delay:
 		visible_characters += (1 + _groupSize)
+		if _beep: music.play_voice(beep_path)
 		if visible_characters >= _target_leng:
 			_grouping = false
 			_groupSize = 0
+			_beep = false
 			visible_characters = int(max(_target_leng, -1))
 			adding = false
 			$Timer.stop()

@@ -170,7 +170,7 @@ func interpret_events(event):
 		24: auto_load_next()
 		25: call_method(ev)
 		26: set_center(ev)
-		_: speech_parse(ev)
+		_: _parse_speech(ev)
 
 #----------------------- on ready, new game, load, set up, end -----------------
 func auto_start(start_block:String="starter", start_id=null):
@@ -273,18 +273,18 @@ func set_center(ev: Dictionary):
 
 	say(_u.has_or_default(ev,"who",""), ev['center'], \
 		_parse_speed(_u.has_or_default(ev,'speed',vn.cps)),false, _u.has_or_default(ev,'wait',0))
-	var _has_voice:bool = _check_latest_voice(ev)
+	var _has_voice:bool = _check_voice(ev)
 
-func speech_parse(ev : Dictionary) -> void:
+func _parse_speech(ev : Dictionary) -> void:
 	# Voice first
-	var _has_voice:bool = _check_latest_voice(ev)
+	var _has_voice:bool = _check_voice(ev)
 	# one time font change
 	one_time_font_change = ev.has('font')
 	if one_time_font_change:
 		var path:String = vn.FONT_DIR + ev['font']
 		cur_db.add_font_override('normal_font', load(path))
 
-	# Speech
+	# Speech ||| A little strange here ? 
 	var combine:String = "_"
 	for k in ev: # k is not voice, not speed, means it has to be "uid expression"
 		if k.split(" ")[0] in vn.Chs.all_chara:
@@ -294,11 +294,8 @@ func speech_parse(ev : Dictionary) -> void:
 		print("!!! Speech event uid format error: " + str(ev))
 		push_error("Speech event requires a valid character/narrator.")
 	
-	var wt:float = MyUtils.has_or_default(ev,'wait',0.0)
-	if ev.has('speed'):
-		say(combine, ev[combine], _parse_speed(ev['speed']), false, wt)
-	else:
-		say(combine, ev[combine], vn.cps, false, wt)
+	say(combine, ev[combine], _parse_speed(_u.has_or_default(ev,'speed', vn.cps))\
+		, false, _u.has_or_default(ev,'wait',0.0))
 
 func generate_choices(ev: Dictionary):
 	# make a say event
@@ -307,7 +304,7 @@ func generate_choices(ev: Dictionary):
 	if vn.auto_on or vn.skipping:
 		QM.disable_skip_auto()
 	
-	var _has_voice:bool = _check_latest_voice(ev)
+	var _has_voice:bool = _check_voice(ev)
 	one_time_font_change = ev.has('font')
 	if one_time_font_change:
 		cur_db.add_font_override('normal_font', load(vn.FONT_DIR + ev['font']))
@@ -317,7 +314,7 @@ func generate_choices(ev: Dictionary):
 			c = k
 			break
 	if c != "_":
-		say(c,ev[c],_parse_speed(MyUtils.has_or_default(ev,'speed',vn.cps)), true)
+		say(c,ev[c],_parse_speed(_u.has_or_default(ev,'speed',vn.cps)), true)
 	
 	if ev['choice'] in ['','url']: 
 		# Intentionally left blank
@@ -353,27 +350,26 @@ func generate_choices(ev: Dictionary):
 		
 	choiceContainer.visible = true # make it visible now
 	
-func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false,wt:float=0):
+func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false, wt:float=0):
 	var uid:String = express(combine, false, true)
 	words = preprocess(words)
-	var t:String = vn.Utils.eliminate_special_symbols(words, "((?<!\\\\)_)|((?<!\\\\)%)")
-	t = t.replace("\\_", "_").replace("\\%", "%")
+	var use_beep:bool = (latest_voice == '')
 	if vn.skipping: cps = 0.0
 	if self.nvl: # little awkward. But stable for now.
 		if just_loaded:
 			just_loaded = false
 			if centered:
-				cur_db.set_dialog(uid, words, cps, true, t)
+				cur_db.set_dialog(uid, words, cps, true, use_beep)
 			else:
 				cur_db.visible_characters = len(cur_db.text)
 		else:
 			if centered:
-				cur_db.set_dialog(uid, words, cps, true, t)
+				cur_db.set_dialog(uid, words, cps, true, use_beep)
 				vn.Pgs.nvl_text = ''
 			else:
-				cur_db.set_dialog(uid, words, cps, false, t)
-				vn.Pgs.nvl_text = cur_db.finalized_dialog
-			_voice_to_hist((latest_voice!='') and vn.voice_to_history, uid, t)
+				cur_db.set_dialog(uid, words, cps, false, use_beep)
+				vn.Pgs.nvl_text = cur_db.bbcode_text
+			_voice_to_hist(!use_beep and vn.voice_to_history, uid, words)
 	
 	else: # Normal dialog / ADV
 		if not _hide_namebox(uid):
@@ -391,16 +387,18 @@ func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false,w
 				cur_db.reset_fonts()
 		
 		if just_loaded:
-			cur_db.set_dialog(words, cps)
+			cur_db.set_dialog(words, cps, false, use_beep)
 			just_loaded = false
 		else:
-			cur_db.set_dialog(words, cps)
+			var t:String = vn.Utils.eliminate_special_symbols(words, "((?<!\\\\)_)|((?<!\\\\)%)")
+			t = t.replace("\\_", "_").replace("\\%", "%")
+			cur_db.set_dialog(words, cps, false, use_beep)
 			vn.Pgs.playback_events['speech'] = t
-			_voice_to_hist((latest_voice!='') and vn.voice_to_history, uid, t)
+			_voice_to_hist(!use_beep and vn.voice_to_history, uid, t)
 		
 		stage.set_highlight(uid)
 	
-	wait_for_accept(ques,wt)
+	wait_for_accept(ques, wt)
 
 func extend(ev:Dictionary):
 	# Cannot use extend with a choice, extend doesn't support font
@@ -424,20 +422,18 @@ func extend(ev:Dictionary):
 		if ev.has('ext'): ext = 'ext'
 
 		var words:String = preprocess(ev[ext])
-		var cps:float = vn.cps
-		if ev.has('speed'):
-			cps = _parse_speed(ev['speed'])
-		
+		var cps:float = _parse_speed(_u.has_or_default(ev,'speed',vn.cps))
 		var t:String = vn.Utils.eliminate_special_symbols(words, "((?<!\\\\)_)|((?<!\\\\)%)")
 		t = t.replace("\\_", "_").replace("\\%", "%")
-		_voice_to_hist(_check_latest_voice(ev) and vn.voice_to_history, prev_speaker, t)
+		var use_beep:bool = !_check_voice(ev)
+		_voice_to_hist(!use_beep and vn.voice_to_history, prev_speaker, t)
 		if just_loaded:
 			just_loaded = false
-			cur_db.set_dialog(vn.Pgs.playback_events['speech'], vn.cps)
+			cur_db.set_dialog(vn.Pgs.playback_events['speech'], vn.cps, false, use_beep)
 			vn.Pgs.history.pop_back()
 		else:
 			cur_db.bbcode_text = vn.Pgs.playback_events['speech']
-			cur_db.set_dialog(words, cps, true)
+			cur_db.set_dialog(words, cps, true, use_beep)
 			vn.Pgs.playback_events['speech'] += " " + t
 			
 		stage.set_highlight(prev_speaker)
@@ -977,7 +973,7 @@ func load_playback(play_back:Dictionary, RBM:bool = false): # Roll Back Mode
 		
 		stage.set_flip(d['uid'],d['fliph'],d['flipv'])
 		stage.character_scale(d['uid'],{'scale':d['scale'], 'type':"instant"})
-	
+		stage.character_spin(d['uid'], {'deg':d['deg'], 'type':'instant'})
 	if RBM: stage.remove_not_in(onStageCharas)
 	
 	if play_back['nvl'] != '':
@@ -1024,7 +1020,7 @@ func flt_text(ev: Dictionary) -> void:
 	else:
 		f.display(ev['float'], wt, in_t, loc)
 	
-	var has_voice:bool = _check_latest_voice(ev)
+	var has_voice:bool = _check_voice(ev)
 	if ev.has('hist') and (_parse_true_false(ev['hist'])):
 		_voice_to_hist((has_voice and vn.voice_to_history), _u.has_or_default(ev,'who',''), ev['float'] )
 	wait(wt)
@@ -1106,7 +1102,7 @@ func _hide_namebox(uid:String):
 
 # Check this event for latest voice... If there is a voice field,
 # play the voice and then return true
-func _check_latest_voice(ev:Dictionary)->bool:
+func _check_voice(ev:Dictionary)->bool:
 	if ev.has('voice'):
 		latest_voice = ev['voice']
 		if not vn.skipping:

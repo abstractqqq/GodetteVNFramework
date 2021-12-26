@@ -25,6 +25,7 @@ script = ExtResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+beep_path = "res://voice/bleep001.ogg"
 
 [node name="Timer" type="Timer" parent="."]
 

@@ -1,10 +1,12 @@
 extends RichTextLabel
 
+export(String, FILE, "*.ogg") var beep_path = ''
 var autoCounter:int = 0
 var skipCounter:int = 0
 var adding:bool = false
 var _grouping:bool = false
 var _groupSize:int = 0
+var _beep:bool = false
 
 # center = nvl in disguise
 const default_size:Vector2 = Vector2(1100,800)
@@ -12,19 +14,19 @@ const default_pos:Vector2 = Vector2(410,50)
 const CENTER_SIZE:Vector2 = Vector2(1100,300)
 const CENTER_POS:Vector2 = Vector2(410,400)
 var last_uid:String = ''
-var finalized_dialog:String = ''
 var _target_leng:int = 0
 
 signal load_next
 signal all_visible
 
 func _ready():
-	var _err:int = vn.get_node("GlobalTimer").connect("timeout",self, "_on_global_timeout")
+	var _e:int = vn.get_node("GlobalTimer").connect("timeout",self, "_on_global_timeout")
 	var sb:VScrollBar = get_v_scroll()
-	_err = sb.connect("mouse_entered", vn.Utils, "no_mouse")
-	_err = sb.connect("mouse_exited", vn.Utils, "yes_mouse")
+	_e = sb.connect("mouse_entered", vn.Utils, "no_mouse")
+	_e = sb.connect("mouse_exited", vn.Utils, "yes_mouse")
 
-func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name:bool = false, finalized:String=''):
+func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name:bool = false, beep:bool=false):
+	_beep = beep and (beep_path != '')
 	if suppress_name: # if name should not be shown, as in the center case treat it as if it is the narrator
 		uid = ""
 	if (uid != last_uid):
@@ -48,9 +50,7 @@ func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name:bool =
 	visible_characters = text.length()
 	bbcode_text += words
 	_target_leng = text.length()
-	finalized_dialog = bbcode_text + finalized
 	if cps <= 0: # finalized = text without the special escapes like \_ and \%
-		bbcode_text = finalized_dialog
 		visible_characters = -1
 		adding = false
 		return
@@ -68,6 +68,7 @@ func force_finish():
 	
 func _on_Timer_timeout():
 	visible_characters += 1
+	if _beep: music.play_voice(beep_path)
 	if visible_characters >= _target_leng:
 		force_finish()
 

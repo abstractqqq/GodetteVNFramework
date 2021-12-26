@@ -82,7 +82,7 @@ More in the making ~
 2. right click : hide VN related UI (dialog box, name box, quick menu) and only show sprites and background
 3. control + z : rollback to previous dialog
 4. Tab (only in script editor) : generates the ":: ;" string for you. When you have selected text which corresponds to some events, then it will try to generate the event text for you. For instance, if you have selected "a join", it will be interpreted as "there exists a character with uid a, and is joining the scene" and will print "chara:: a join; loc :: * ; expression :: default ;" for you in the script editor.
-5. Control + F : reloads the game script it the json file has been modified and saved. Only works when game is launched in the editor and when dialog is passed as a json. This function currently does not work if current dialog is displayed in NVL mode. You may still be able to refresh when in NVL, but script may not update automatically. You will have to rollback before NVL and then refresh. 
+5. Control + F : reloads the game script it the json file has been modified and saved. Only works when game is launched in the editor and when dialog is passed as a json. This function will not work well when in NVL mode. Please rollback before NVL if you want to make changes to NVL.
 
 ### Exporting your game
 

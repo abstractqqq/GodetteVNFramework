@@ -13,9 +13,13 @@ script = ExtResource( 6 )
 [node name="dialogBox" parent="." instance=ExtResource( 1 )]
 margin_left = 412.0
 margin_top = 832.0
-margin_bottom = 1000.0
+margin_bottom = 1007.0
 
 [node name="nameBox" parent="." instance=ExtResource( 2 )]
+margin_left = 413.0
+margin_top = 767.0
+margin_right = 563.0
+margin_bottom = 810.0
 
 [node name="choiceContainer" parent="." instance=ExtResource( 4 )]
 visible = false

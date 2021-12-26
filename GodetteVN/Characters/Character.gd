@@ -71,14 +71,15 @@ func _shake_action(params): # params[0] = mode, params[1] = amount
 		
 # Is there a better way? If I use tween, then position will be locked, and bad news.
 func jump(direc:Vector2, amount:float, time:float):
-	var step : float = amount/(time/0.04)
+	var step : float = 0.04 * amount / time
 	var _obj:ObjectTimer = ObjectTimer.new(self,time,0.02,"_jump_action", [direc,step], true)
 	add_child(_obj)
 
 func _jump_action(params):
 	# params[0] = jump_dir, params[1] = step_size, params[-1] = total_counts, params[-2] = counter
-	var size:int = params.size()
-	if params[size-2] >= params[size-1]/2:
+	if params[-2] >= params[-1] - 1:
+		position = loc
+	elif params[-2] >= float(params[-1])/2.0:
 		position -= params[1] * params[0]
 	else:
 		position += params[1] * params[0]
