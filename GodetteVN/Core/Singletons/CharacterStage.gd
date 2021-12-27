@@ -216,11 +216,11 @@ func all_on_stage():
 	for n in $characters.get_children():
 		if n is Character:
 			output.append({"uid":n.unique_id, "expression":n.current_expression,\
-			'loc': n.loc, 'deg': n.rotation_degrees, 'fliph':n.flip_h,'flipv':n.flip_v, 'scale':n.scale})
+			'loc': n.loc, 'deg': n.target_deg, 'fliph':n.flip_h,'flipv':n.flip_v, 'scale':n.target_sc})
 	return output
 	
 func set_flip(uid:String, fliph:bool=false, flipv:bool=false):
-	var c:Character = find_chara_on_stage(uid)
+	var c = find_chara_on_stage(uid)
 	if c:
 		c.flip_h = fliph
 		c.flip_v = flipv

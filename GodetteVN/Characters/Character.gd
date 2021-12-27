@@ -21,6 +21,8 @@ var _fading:bool = false
 #-----------------------------------------------------
 # Character attributes
 var loc:Vector2 = Vector2()
+var target_deg:float = rotation_degrees
+var target_sc:Vector2 = Vector2(1,1)
 var current_expression : String = ""
 # --- only used in some actions... Would like to get rid of, but can't find
 # alternative rn.
@@ -51,9 +53,15 @@ func change_expression(e : String, in_fadein:bool=false) -> bool:
 		return false
 
 func change_scale(sc:Vector2, t:float, type:String="linear"):
-	sc = Vector2(abs(sc.x), abs(sc.y))
+	for c in get_children():
+		if c is OneShotTween and c.name == "sc":
+			c.queue_free()
+			scale = target_sc
+			break
+	target_sc = Vector2(abs(sc.x), abs(sc.y))
 	var tween:OneShotTween = OneShotTween.new()
-	var _e = tween.interpolate_property(self,'scale',self.scale, sc,t,\
+	tween.name = "sc"
+	var _e = tween.interpolate_property(self,'scale',scale, target_sc,t,\
 		vn.Utils.movement_type(type), Tween.EASE_IN_OUT)
 	add_child(tween)
 	_e = tween.start()
@@ -85,27 +93,34 @@ func _jump_action(params):
 		position += params[1] * params[0]
 
 func fadein(time : float, expression:String=""):
-	var _e:bool = change_expression(expression, true)
+	var _e : bool = change_expression(expression, true)
 	_fading = true
 	var tween:OneShotTween = OneShotTween.new(self, "set", ["_fading", false])
 	add_child(tween)
-	var _err:bool = tween.interpolate_property(self, "modulate", Color(0,0,0,0), vn.DIM, time,
+	_e = tween.interpolate_property(self, "modulate", Color(0,0,0,0), vn.DIM, time,
 		Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
-	_err = tween.start()
+	_e = tween.start()
 	
 func fadeout(t: float):
 	vn.Utils.after_image(position, scale, modulate, flip_h, flip_v, rotation_degrees,\
 		 get_sprite_frames().get_frame(current_expression,0), t, z_index, self)
 	
 func spin(sdir:int,deg:float,t:float,type:String="linear"):
+	for c in get_children():
+		if c is OneShotTween and c.name == "spin":
+			c.queue_free()
+			rotation_degrees = target_deg
+			break
 	if sdir > 0:  sdir = 1
 	else:  sdir = -1
 	deg = (sdir*deg)
+	target_deg = deg + rotation_degrees
 	var tween:OneShotTween = OneShotTween.new()
-	var _err:bool = tween.interpolate_property(self,'rotation_degrees',self.rotation_degrees, self.rotation_degrees+deg,t,\
+	tween.name = "spin"
+	var _e:bool = tween.interpolate_property(self,'rotation_degrees', rotation_degrees, target_deg,t,\
 		vn.Utils.movement_type(type), Tween.EASE_IN_OUT)
 	add_child(tween)
-	_err = tween.start()
+	_e = tween.start()
 
 func _dummy_fadeout(expFrames:SpriteFrames, prev_exp:String):
 	if fade_on_change and prev_exp != "":

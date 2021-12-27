@@ -662,7 +662,7 @@ func screen_effects(ev: Dictionary, auto_forw:bool=true):
 		"tint", "tintwave": tint(ev)
 		"flashlight": flashlight(ev)
 		_:
-			if temp.size()==2 and not vn.skipping and ef in vn.TRANSITIONS:
+			if len(temp)==2 and not vn.skipping and ef in vn.TRANSITIONS:
 				var mode:String = temp[1]
 				var c:Color = _u.has_or_default(ev, "color", Color.black)
 				var t:float = _u.has_or_default(ev,"time",1.0)

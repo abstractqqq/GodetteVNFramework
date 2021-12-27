@@ -11,10 +11,9 @@ func _init(node:Node=null, method:String="", arg:Array=[], free:bool=false):
 	self.call_method = method
 	self.call_arg = arg
 	self.free_cb = free
-	var _err = self.connect("tween_all_completed", self, "queue_free")
+	var _e:int = self.connect("tween_all_completed", self, "queue_free")
 	
 func queue_free():
-	# yield(get_tree(),'idle_frame')
 	if is_instance_valid(call_back_node) and call_method != "":
 		call_back_node.callv(call_method, call_arg)
 		.queue_free()

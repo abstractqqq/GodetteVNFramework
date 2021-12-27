@@ -109,3 +109,10 @@ func _ready():
 func simple_print(a,b):
 	# test function for the {call:.. } event
 	print(a,b)
+
+
+func _on_bg_changed(path):
+	# No need to include res://bg/ in path. 
+	# Used mostly to apply special shaders and other effects 
+	# to specific pictures. 
+	pass # Replace with function body.

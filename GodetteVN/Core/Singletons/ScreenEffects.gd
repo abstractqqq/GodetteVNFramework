@@ -35,6 +35,7 @@ func show_weather(w_name:String):
 func removeLasting():
 	MyUtils.free_children($lasting)
 
+# Refactor one day
 func tint(c: Color,t : float):
 	removeLasting()
 	var tint:Node = load("res://GodetteVN/Core/_Details/tintRect.tscn").instance()
