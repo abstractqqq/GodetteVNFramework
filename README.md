@@ -1,6 +1,6 @@
 # GodetteVN, A Visual Novel Framework for Godot Users
 
-## I am focusing on making a game with this rn. No update planned unless it's a bug. I lied. A few more updates before I jump into my own game!
+## I am focusing on making a game with this rn. No update planned unless it's a bug.
 
 ![Godette](/Showcases/show1.png)
 
