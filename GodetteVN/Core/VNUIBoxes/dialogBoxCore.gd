@@ -125,7 +125,7 @@ func _add_visible(delay:bool = false):
 			_groupedWord = ''
 		else:
 			visible_characters += (1 + _groupSize)
-		if _beep: music.play_voice(beep_path)
+			if _beep: music.play_voice(beep_path)
 		if visible_characters >= _target_leng:
 			_grouping = false
 			_groupSize = 0
