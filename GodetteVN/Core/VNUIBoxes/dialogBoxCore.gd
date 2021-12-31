@@ -13,6 +13,9 @@ var _target_leng:int = 0
 var _grouping:bool = false
 var _groupSize:int = 0
 var _groupedWord:String = ''
+var _lastUnderscoreIdx:int = 0
+var _lastPctIdx:int = 0
+var _lastSlashIdx:int = 0
 var _beep:bool = false
 
 # var eod_str:String = "[fade start=1 length=4]  >>>[/fade]"
@@ -45,6 +48,9 @@ func set_chara_fonts(ev:Dictionary):
 func set_dialog(words : String, cps:float = vn.cps, extend:bool = false, beep:bool = false):
 	# words will be already preprocessed
 	#eod = false
+	_lastPctIdx = -1
+	_lastUnderscoreIdx = -1
+	_lastSlashIdx = -1
 	_beep = beep and (beep_path != '')
 	if extend:
 		visible_characters = text.length()
@@ -93,8 +99,11 @@ func _on_Timer_timeout():
 			"\\":
 				if cur + 1 >= leng or not text[cur+1] in ["_","%"]:
 					valid = false
+					_lastSlashIdx = bbcode_text.findn("\\", _lastSlashIdx+1)
 				else:
 					pattern = "\\\\"
+					if text[cur+1] == "_": _lastUnderscoreIdx = bbcode_text.findn("_", _lastUnderscoreIdx+1)
+					elif text[cur+1] == "%": _lastPctIdx = bbcode_text.findn("%", _lastPctIdx+1)
 			"%":
 				_grouping = !_grouping
 				if _grouping: _groupedWord = ''
@@ -106,7 +115,12 @@ func _on_Timer_timeout():
 			_: valid = false
 		# print(text[cur], " Delay : ", delay)
 		if valid:
-			bbcode_text = vn.Utils.eliminate_special_symbols(bbcode_text, pattern, false)
+			if pattern == "%":
+				bbcode_text = vn.Utils.eliminate_special_symbols(bbcode_text, pattern, false, _lastPctIdx+1)
+			elif pattern == "_":
+				bbcode_text = vn.Utils.eliminate_special_symbols(bbcode_text, pattern, false, _lastUnderscoreIdx+1)
+			elif pattern == "\\\\":
+				bbcode_text = vn.Utils.eliminate_special_symbols(bbcode_text, pattern, false, _lastSlashIdx+1)
 			_target_leng -= 1
 	elif _grouping:
 		visible_characters = text.length()

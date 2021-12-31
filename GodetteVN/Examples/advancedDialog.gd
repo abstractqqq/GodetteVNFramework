@@ -9,11 +9,13 @@ var main_block = [
 	# start of content
 	{"screen":"fade in", 'time':1},
 	{'chara': "gt join", "loc": "800 650"},
+	{'dvar':'mo = 100*2'},
 	{"gt": "Hello Everyone!"},
+	{"gt":"Let's check how much money we have: [mo]."},
 	{'gt':"Today let's go over some advanced dialog dynamics."},
 	{'gt':"You can now d_____e__________l________________a____________________y "+\
 	"printing any letter or __________%word% by any amount of time easily."},
-	{"gt":"What's even better is that now you can %10%change the speed of dialog "+\
+	{"gt":"[color=#123F01]What's even better is that[/color] now you can %10%change the speed of dialog "+\
 	"with absolute ease! %40.12%That's right! With absolute ease!"},
 	{'chara':'gt scale', 'scale':Vector2(3,3)},
 	{'chara':'gt move', 'loc':'700 1200'},
@@ -21,7 +23,7 @@ var main_block = [
 	{'gt':'I said [font=res://fonts/ABigger.tres]____________%ANY% _________________%WORD%[/font] '+\
 	"can be delayed for any time. And %10%text speed can be changed at any point!!!"},
 	{'chara':'gt spin', 'sdir':-1, 'deg':40},
-	{'gt':'Do you hear that???'},
+	{'gt':'Did you hear that???'},
 	{'chara':'gt spin', 'sdir':1, 'deg':20},
 	{'chara':'gt scale', 'scale':Vector2(1,1)},
 	{'chara':'gt move', 'loc': Vector2(800, 650)},
