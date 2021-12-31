@@ -33,11 +33,13 @@ var main_block = [
 	{'gt':"Today let's go over some advanced dialog dynamics."},
 	{'gt':"You can now d_____e__________l________________a____________________y "+\
 	"printing any letter or __________%word% by any amount of time easily."},
+	{"gt":"What's even better is that now you can %10%change the speed of dialog "+\
+	"with absolute ease! %40.12%That's right! With absolute ease!"},
 	{'chara':'gt scale', 'scale':Vector2(3,3)},
 	{'chara':'gt move', 'loc':'700 1200'},
 	{'chara':'gt spin', 'sdir':1, 'deg':20},
 	{'gt':'I said [font=res://fonts/ABigger.tres]____________%ANY% _________________%WORD%[/font] '+\
-	"can be delayed for any time."},
+	"can be delayed for any time. And %10%text speed can be changed at any point!!!"},
 	{'chara':'gt spin', 'sdir':-1, 'deg':40},
 	{'gt':'Do you hear that???'},
 	{'chara':'gt spin', 'sdir':1, 'deg':20},

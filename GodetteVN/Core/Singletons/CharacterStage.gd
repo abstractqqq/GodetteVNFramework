@@ -59,6 +59,7 @@ func character_spin(uid:String, ev:Dictionary):
 		var c:Character = find_chara_on_stage(uid)
 		if type == 'instant' or vn.skipping:
 			c.rotation_degrees = degrees
+			c.target_deg = degrees
 		else:
 			c.spin(sdir,degrees,time,type)
 		
@@ -71,6 +72,7 @@ func character_scale(uid:String, ev:Dictionary):
 	var type:String = MyUtils.has_or_default(ev,'type','linear')
 	if type == 'instant' or vn.skipping or vn.inLoading:
 		c.scale = ev['scale']
+		c.target_sc = ev['scale']
 	else:
 		c.change_scale(ev['scale'], MyUtils.has_or_default(ev,'time',1.0), type)
 		

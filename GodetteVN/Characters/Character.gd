@@ -31,7 +31,6 @@ var _objTimer
 
 #-------------------------------------------------------------------------------
 
-
 func change_expression(e : String, in_fadein:bool=false) -> bool:
 	if e == "": e = 'default'
 	if in_fadein: modulate.a = 0
@@ -106,7 +105,7 @@ func fadeout(t: float):
 		 get_sprite_frames().get_frame(current_expression,0), t, z_index, self)
 	
 func spin(sdir:int,deg:float,t:float,type:String="linear"):
-	for c in get_children():
+	for c in get_children(): # If there is a tween in action, stop, 
 		if c is OneShotTween and c.name == "spin":
 			c.queue_free()
 			rotation_degrees = target_deg

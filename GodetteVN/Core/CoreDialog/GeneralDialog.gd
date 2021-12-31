@@ -390,7 +390,7 @@ func say(combine : String, words : String, cps:float=vn.cps, ques:bool = false, 
 			cur_db.set_dialog(words, cps, false, use_beep)
 			just_loaded = false
 		else:
-			var t:String = vn.Utils.eliminate_special_symbols(words, "((?<!\\\\)_)|((?<!\\\\)%)")
+			var t:String = vn.Utils.eliminate_special_symbols(words, "(%(\\d+\\.?\\d+)%)|((?<!\\\\)_)|((?<!\\\\)%)")
 			t = t.replace("\\_", "_").replace("\\%", "%")
 			cur_db.set_dialog(words, cps, false, use_beep)
 			vn.Pgs.playback_events['speech'] = t
@@ -423,7 +423,7 @@ func extend(ev:Dictionary):
 
 		var words:String = preprocess(ev[ext])
 		var cps:float = _parse_speed(_u.has_or_default(ev,'speed',vn.cps))
-		var t:String = vn.Utils.eliminate_special_symbols(words, "((?<!\\\\)_)|((?<!\\\\)%)")
+		var t:String = vn.Utils.eliminate_special_symbols(words, "(%(\\d+\\.?\\d+)%)|((?<!\\\\)_)|((?<!\\\\)%)")
 		t = t.replace("\\_", "_").replace("\\%", "%")
 		var use_beep:bool = !_check_voice(ev)
 		_voice_to_hist(!use_beep and vn.voice_to_history, prev_speaker, t)
@@ -465,6 +465,7 @@ func play_bgm(ev : Dictionary, auto_forw=true) -> void:
 	var path:String = ev['bgm']
 	if (path in ["","off"]) and ev.size() == 1:
 		music.stop_bgm()
+		_cur_bgm = ''
 		vn.Pgs.playback_events['bgm'] = {'bgm':''}
 		auto_load_next(auto_forw)
 		return
@@ -482,6 +483,7 @@ func play_bgm(ev : Dictionary, auto_forw=true) -> void:
 	if (path in ["","off"]) and ev.size() > 1: # must be a fadeout
 		if ev.has('fadeout'):
 			music.fadeout(ev['fadeout'])
+			_cur_bgm = ''
 			vn.Pgs.playback_events['bgm'] = {'bgm':''}
 			auto_load_next(auto_forw)
 			return

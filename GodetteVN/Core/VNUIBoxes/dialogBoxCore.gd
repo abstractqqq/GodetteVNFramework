@@ -11,7 +11,8 @@ var skipCounter:int = 0
 var adding:bool = false
 var _target_leng:int = 0
 var _grouping:bool = false
-var _groupSize:int = 0 
+var _groupSize:int = 0
+var _groupedWord:String = ''
 var _beep:bool = false
 
 # var eod_str:String = "[fade start=1 length=4]  >>>[/fade]"
@@ -78,6 +79,7 @@ func _on_Timer_timeout():
 	#	bbcode_text = bbcode_text.substr(0,_target_leng) + eod_str
 	var delay:bool = false
 	if _grouping:
+		_groupedWord += text[visible_characters + _groupSize]
 		_groupSize += 1
 		delay = true
 	else:
@@ -95,6 +97,7 @@ func _on_Timer_timeout():
 					pattern = "\\\\"
 			"%":
 				_grouping = !_grouping
+				if _grouping: _groupedWord = ''
 				delay = _grouping
 				pattern = "%"
 			"_": 
@@ -116,7 +119,12 @@ func _on_Timer_timeout():
 
 func _add_visible(delay:bool = false):
 	if not delay:
-		visible_characters += (1 + _groupSize)
+		if _groupedWord.is_valid_float():
+			$Timer.wait_time = max(0.015, 1.0/float(_groupedWord))
+			bbcode_text = vn.Utils.eliminate_special_symbols(bbcode_text, _groupedWord, false)
+			_groupedWord = ''
+		else:
+			visible_characters += (1 + _groupSize)
 		if _beep: music.play_voice(beep_path)
 		if visible_characters >= _target_leng:
 			_grouping = false

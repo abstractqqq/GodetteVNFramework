@@ -111,7 +111,7 @@ func simple_print(a,b):
 	print(a,b)
 
 
-func _on_bg_changed(path):
+func _on_bg_changed(_path:String):
 	# No need to include res://bg/ in path. 
 	# Used mostly to apply special shaders and other effects 
 	# to specific pictures. 

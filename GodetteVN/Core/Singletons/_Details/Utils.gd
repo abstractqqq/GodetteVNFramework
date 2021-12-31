@@ -235,9 +235,10 @@ func read(s, json:bool=false):
 			return s
 
 #---------------------------------------------------------------------
-func eliminate_special_symbols(s:String, pattern_to_kill:String, all:bool=true) -> String:
+func eliminate_special_symbols(s:String, pattern_to_kill:String, all:bool=true,
+	offset:int = 0) -> String:
 	var _e:int = regex.compile(pattern_to_kill) # "(?<!\\\\)_")
-	return regex.sub(s, "", all)
+	return regex.sub(s, "", all, offset)
 
 #---------------------------------------------------------------------
 # Used if you only want your parameters to be between 0 and 1.
