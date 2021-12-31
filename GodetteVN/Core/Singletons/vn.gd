@@ -15,6 +15,7 @@ const voice_to_history:bool = true # Should voice be replayable in history?
 const show_chosen_choices:bool = true
 
 #-----------------
+const GAME_VERSION:String = "0.0"
 
 # size of thumbnail on save slot. Has to manually adjust the TextureRect's size 
 # in textBoxInHistory as well

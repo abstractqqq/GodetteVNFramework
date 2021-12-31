@@ -132,7 +132,7 @@ func gather_save_data():
 	var data:Dictionary = {'currentNodePath':vn.Pgs.currentNodePath, 'currentBlock': vn.Pgs.currentBlock,\
 	'currentIndex': vn.Pgs.currentIndex, 'thumbnail': latest_thumbnail(),\
 	'currentSaveDesc': vn.Pgs.currentSaveDesc, 'history':vn.Pgs.history,\
-	'playback': vn.Pgs.playback_events, 'datetime': datetime,\
+	'playback': vn.Pgs.playback_events, 'datetime': datetime, 'GAME_VERSION':vn.GAME_VERSION,\
 	'dvar':vn.dvar, 'rollback':vn.Pgs.rollback_records, 'chara_pointer':vn.Chs.chara_pointer,
 	'name_patches':vn.Chs.chara_name_patch, 'control_state':vn.Pgs.control_state}
 	
@@ -171,7 +171,7 @@ func write_to_save(path:String, data:Dictionary):
 		file.store_var(data)
 		file.close()
 	else:
-		push_error('Error when loading saves. Probably save data is corrupted.')
+		push_error('Error when opening saves. Probably save data is corrupted or vn.PASSWORD is changed.')
 
 #------------------------------------------------------------------------
 # Given any sentence with a [dvar] in it, 

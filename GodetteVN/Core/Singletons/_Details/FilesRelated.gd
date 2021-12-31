@@ -1,9 +1,8 @@
 extends Node
 
-var system_data = {}
-const CONFIG_PATH = "user://config.json"
-const image_exts = ['png', 'jpg', 'jpeg']
-const _default_config_vars = {'bgm_volume':0, 'eff_volume':0,\
+var system_data:Dictionary = {}
+const CONFIG_PATH:String = "user://config.json"
+const _default_config_vars:Dictionary = {'bgm_volume':0, 'eff_volume':0,\
  'voice_volume':0,'auto_time':2}
 
 func _ready():
@@ -85,7 +84,7 @@ func get_chara_sprites(uid, which = "sprite"):
 		if not pic.begins_with("."):
 			var temp:PoolStringArray = pic.split(".")
 			var ext:String = temp[temp.size()-1]
-			if ext in image_exts:
+			if ext in ['png', 'jpg', 'jpeg']:
 				var pic_id:String = (temp[0].split("_"))[0]
 				if pic_id == uid:
 					sprites.append(pic)
@@ -110,7 +109,7 @@ func get_backgrounds():
 		if not pic.begins_with("."):
 			var temp:PoolStringArray = pic.split(".")
 			var ext:String = temp[temp.size()-1]
-			if ext in image_exts:
+			if ext in ['png', 'jpg', 'jpeg']:
 				bgs.append(pic)
 				
 	dir.list_dir_end()
@@ -195,7 +194,7 @@ func reset_spoilerproof(scene_path:String):
 			
 func remove_spoilerproof(scene_path:String):
 	if system_data.has(scene_path):
-		system_data.erase(scene_path)
+		var _e:bool = system_data.erase(scene_path)
 
 func _exit_tree():
 	write_to_config()

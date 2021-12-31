@@ -21,6 +21,7 @@ var main_block = [
 	{'wait':2},
 	{"bg": "condo.jpg", 'sweep_down':2, 'color':Color.pink},
 	{'female':'Hello, hello,_________ %is it time for me to show up?'},
+	# {'then':'patch_0.01', 'id':1},
 	{'chara': "female fadein", "loc": "1600 600",'time':0.5, 'expr':'smile1'},
 	{'chara':'female move', 'time':3, 'loc': Vector2(500,600),'expr':'wink'},
 	{'extend': 'This is an extend statement~', 'speed':'slower'},
@@ -90,12 +91,19 @@ var block2 = [
 	{'then' : 'starter', 'target id' : 0}
 ]
 
+var patch = [
+	
+	{"female" : 'This is the content of the new patch.'},
+	{'then' : 'starter', 'target id' : 1}
+	
+]
+
 
 #---------------------------------------------------------------------
 # If you change the key word 'starter', you will have to go to generalDialog.gd
 # and find start_scene, under if == 'new_game', change to blocks['starter'].
 # Other key word you can change at will as long as you're refering to them correctly.
-var dialog_blocks = {'starter' : main_block, 'block2' : block2}
+var dialog_blocks = {'starter' : main_block, 'block2' : block2, 'patch_0.01':patch}
 
 var choice_blocks = {'food': food_choices}
 
@@ -103,6 +111,7 @@ var choice_blocks = {'food': food_choices}
 #---------------------------------------------------------------------
 func _ready():
 	start_scene(dialog_blocks, choice_blocks, {}, vn.Pgs.load_instruction)
+	print(vn.Pgs.currentNodePath)
 
 #---------------------------------------------------------------------
 
