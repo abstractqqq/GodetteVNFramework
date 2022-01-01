@@ -7,7 +7,7 @@ export(String) var scene_description
 
 export(String, FILE, "*.tscn") var choice_bar = 'res://GodetteVN/Core/ChoiceBar/choiceBar.tscn'
 export(String, FILE, "*.tscn") var float_text = 'res://GodetteVN/Core/_Details/floatText.tscn'
-export(String, FILE, "*.tscn") var nvl_screen = 'res://GodetteVN/Core/_Details/nvlBox.tscn'
+export(String, FILE, "*.tscn") var nvl_screen = 'res://GodetteVN/Core/_Details/nvlScene.tscn'
 export(bool) var allow_rollback = true
 export(bool) var refresh_game_ctrl_state = true
 

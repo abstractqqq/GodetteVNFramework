@@ -12,7 +12,7 @@ var _beep:bool = false
 const default_size:Vector2 = Vector2(1100,800)
 const default_pos:Vector2 = Vector2(410,50)
 const CENTER_SIZE:Vector2 = Vector2(1100,300)
-const CENTER_POS:Vector2 = Vector2(410,400)
+const CENTER_POS:Vector2 = Vector2(-550,400)
 var last_uid:String = ''
 var _target_leng:int = 0
 
