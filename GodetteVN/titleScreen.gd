@@ -29,6 +29,7 @@ func _on_loadButton_pressed():
 func update_saves():
 	# Show a screen telling the players about the update
 	# and what will happen to the saves...
+	if true: return
 	
 	# Handling save update... ...
 	var saves:Array = vn.Files.get_save_files()

@@ -1041,10 +1041,11 @@ func nvl_on(center_font:String=''):
 	stage.set_modulate_4_all(vn.DIM)
 	clear_boxes()
 	hide_boxes()
-	cur_db = load(nvl_screen).instance()
+	var nvlScene:Node2D = load(nvl_screen).instance()
+	cur_db = nvlScene.get_node('nvlBox')
 	var _err:int = cur_db.connect('load_next', self, 'check_dialog')
 	self.nvl = true
-	$VNUI.add_child(cur_db)
+	$VNUI.add_child(nvlScene)
 	if centered:
 		cur_db.center_mode()
 		if center_font != '':

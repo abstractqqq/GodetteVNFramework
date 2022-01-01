@@ -81,7 +81,11 @@ func center_mode():
 
 func queue_free():
 	vn.Pgs.nvl_text = ""
-	.queue_free()
+	var par = get_parent()
+	if par:
+		par.queue_free()
+	else:
+		.queue_free()
 
 func _on_global_timeout():
 	if vn.skipping:

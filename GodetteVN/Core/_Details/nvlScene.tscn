@@ -1,22 +1,25 @@
 [gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://fonts/DEFAULT_NORMAL.tres" type="DynamicFont" id=1]
-[ext_resource path="res://fonts/DEFAULT_ITALICS.tres" type="DynamicFont" id=2]
-[ext_resource path="res://fonts/DEFAULT_BOLD.tres" type="DynamicFont" id=3]
+[ext_resource path="res://fonts/DEFAULT_BOLD.tres" type="DynamicFont" id=2]
+[ext_resource path="res://fonts/DEFAULT_ITALICS.tres" type="DynamicFont" id=3]
 [ext_resource path="res://GodetteVN/Core/_Details/nvlBox.gd" type="Script" id=4]
 
-[node name="nvlBox" type="RichTextLabel"]
+[node name="nvlScene" type="Node2D"]
+position = Vector2( 990, 0 )
+
+[node name="nvlBox" type="RichTextLabel" parent="."]
 anchor_left = 0.5
 anchor_right = 0.5
 margin_left = -550.0
-margin_top = 50.0
+margin_top = 60.0
 margin_right = 550.0
-margin_bottom = 850.0
+margin_bottom = 800.0
 rect_min_size = Vector2( 1100, 800 )
 mouse_filter = 2
 custom_colors/default_color = Color( 1, 1, 1, 1 )
-custom_fonts/italics_font = ExtResource( 2 )
-custom_fonts/bold_font = ExtResource( 3 )
+custom_fonts/italics_font = ExtResource( 3 )
+custom_fonts/bold_font = ExtResource( 2 )
 custom_fonts/normal_font = ExtResource( 1 )
 bbcode_enabled = true
 visible_characters = 0
@@ -27,6 +30,6 @@ __meta__ = {
 }
 beep_path = "res://voice/bleep001.ogg"
 
-[node name="Timer" type="Timer" parent="."]
+[node name="Timer" type="Timer" parent="nvlBox"]
 
-[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
+[connection signal="timeout" from="nvlBox/Timer" to="nvlBox" method="_on_Timer_timeout"]
