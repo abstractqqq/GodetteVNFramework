@@ -40,6 +40,7 @@ custom_fonts/italics_font = ExtResource( 3 )
 custom_fonts/bold_font = ExtResource( 2 )
 custom_fonts/normal_font = ExtResource( 4 )
 visible_characters = -1
+scroll_following = true
 
 [connection signal="gui_input" from="." to="." method="_on_dialogBox_gui_input"]
 [connection signal="mouse_entered" from="." to="." method="_on_dialogBox_mouse_entered"]

@@ -12,5 +12,6 @@ scene_description = "Introduction to System 2"
 [node name="background" parent="." instance=ExtResource( 4 )]
 
 [node name="VNUI" parent="." instance=ExtResource( 2 )]
+use_scroll = false
 
 [connection signal="bg_changed" from="background" to="." method="_on_bg_changed"]

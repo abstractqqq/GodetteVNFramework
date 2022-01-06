@@ -9,7 +9,6 @@ script = ExtResource( 4 )
 dialog_json = "res://VNScript/test2.json"
 debug_mode = true
 scene_description = "Introduction to System 1"
-nvl_screen = "res://GodetteVN/Core/_Details/nvlScene.tscn"
 
 [node name="background" parent="." instance=ExtResource( 2 )]
 

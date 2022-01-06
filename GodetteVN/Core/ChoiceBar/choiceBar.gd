@@ -15,7 +15,7 @@ func setup_choice(text:String, ev:Dictionary, infer_chosen:bool=false):
 				cur_bl = ev['then']
 				cur_idx = -1
 				
-		var max_idx = vn.Files.system_data[cur_sc][cur_bl]
+		var max_idx:int = vn.Files.system_data[cur_sc][cur_bl]
 		if max_idx > cur_idx:
 			# set it 
 			$text.add_color_override("default_color", Color("#535252"))

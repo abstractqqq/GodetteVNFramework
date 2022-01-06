@@ -3,7 +3,7 @@ extends Node
 var system_data:Dictionary = {}
 const CONFIG_PATH:String = "user://config.json"
 const _default_config_vars:Dictionary = {'bgm_volume':0, 'eff_volume':0,\
- 'voice_volume':0,'auto_time':2}
+ 'voice_volume':0,'auto_time':2, 'total_dialogs':0}
 
 func _ready():
 	load_config()
@@ -171,30 +171,77 @@ func load_config():
 	AudioServer.set_bus_volume_db(2, system_data["eff_volume"])
 	AudioServer.set_bus_volume_db(3, system_data["voice_volume"])
 	vn.auto_time = system_data['auto_time']
+	
+func regiester_dialog_json(fpath:String, spoiler_proof:bool=true):
+	if system_data.has(fpath) or system_data.has(fpath+'_size'):
+		return 
+	if fpath.ends_with(".json"):
+		var dialogs = load_json(fpath)['Dialogs']
+		if spoiler_proof:
+			make_spoilerproof(fpath, dialogs)
+		else:
+			system_data[fpath+"_size"] = 0
+			for branch in dialogs:
+				system_data[fpath+"_size"] += _find_num_dialogs(dialogs[branch])
+				system_data['total_dialogs'] += system_data[fpath+"_size"]
+			
 
-func make_spoilerproof(scene_path:String, all_dialog_blocks):
+func make_spoilerproof(scene_path:String, all_dialog_blocks:Dictionary):
 	if system_data.has(scene_path) == false:
+		system_data[scene_path+"_size"] = 0
 		var ev:Dictionary = {}
 		for block in all_dialog_blocks:
 			ev[block] = -1
+			system_data[scene_path+"_size"] += _find_num_dialogs(all_dialog_blocks[block])
+			system_data['total_dialogs'] += system_data[scene_path+"_size"]
 			
 		system_data[scene_path] = ev
 		
+func _find_num_dialogs(block:Array) -> int:
+	var m:int = 0
+	for ev in block:
+		if ev.has('condition'):
+			var new_ev:Dictionary = ev.duplicate()
+			var ok:bool = new_ev.erase('condition')
+			if vn.event_reader(new_ev) == -1:
+				m += 1
+		elif vn.event_reader(ev) == -1:
+			m += 1
+	return m
+		
 func reset_all_spoilerproof():
 	var regex:RegEx = RegEx.new()
-	var _e:int = regex.compile("^(res://)(.+)(\\.tscn)$")
+	var _e:int = regex.compile("(^(res://)(.+)(\\.tscn)$)|(\\.json)$")
 	for k in system_data:
 		if regex.search(k):
 			reset_spoilerproof(k)
+	#if system_data['total_dialogs'] != 0:
+	#	system_data['total_dialogs'] = 0
 
 func reset_spoilerproof(scene_path:String):
 	if system_data.has(scene_path):
 		for key in system_data[scene_path]:
 			system_data[scene_path][key] = -1
 			
+		# system_data['total_dialogs'] -= system_data[scene_path+"_size"]
+	
 func remove_spoilerproof(scene_path:String):
 	if system_data.has(scene_path):
 		var _e:bool = system_data.erase(scene_path)
+		
+func get_progress() -> float:
+	var progress:int = 0
+	var regex:RegEx = RegEx.new()
+	var _e:int = regex.compile("^(res://)(.+)(\\.tscn)$")
+	for k in system_data:
+		if regex.search(k): # k is a scene_path
+			for branch in system_data[k]:
+				progress += system_data[k][branch] + 1
+	
+	print(progress)
+	print(system_data['total_dialogs'])
+	
+	return min(1.0, float(progress) / float(system_data['total_dialogs']))
 
 func _exit_tree():
 	write_to_config()

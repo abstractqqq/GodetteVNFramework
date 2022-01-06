@@ -509,7 +509,10 @@ func play_bgm(ev : Dictionary, auto_forw=true) -> void:
 		push_error('Expecting a fadein field with time as its value.')
 	
 func play_sound(ev :Dictionary) -> void:
-	music.play_sound(vn.AUDIO_DIR+ev['audio'], _u.has_or_default(ev, "vol", 0.0))
+	if ev.has('delay'):
+		_u.schedule_job(music,"play_sound",max(0.05, ev['delay']),[ev['audio'], _u.has_or_default(ev, "vol", 0.0)])
+	else:
+		music.play_sound(vn.AUDIO_DIR+ev['audio'], _u.has_or_default(ev, "vol", 0.0))
 	auto_load_next()
 	
 func voice(path:String, auto_forw:bool = true) -> void:

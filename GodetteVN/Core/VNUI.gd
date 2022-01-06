@@ -1,20 +1,23 @@
 extends CanvasLayer
 
+export(bool) var use_scroll = true
 export(bool) var show_quick_menu = true
 export(bool) var draggable_dialog = false
 export(bool) var resizable_dialog = false
 export(bool) var name_box_follow_chara = false
 export(bool) var fix_relative_name_box_pos = true
 
+
 onready var dbox = $dialogBox/dialogBoxCore
 onready var fixed_diff = $nameBox.rect_position-$dialogBox.rect_position
 
 func _ready():
 	set_dialog_box_options(draggable_dialog,resizable_dialog)
-	if show_quick_menu == false: free_QM()
-
-func free_QM():
-	get_node("quickMenu").queue_free()
+	if show_quick_menu == false: 
+		$quickMenu.queue_free()
+	if not use_scroll:
+		dbox.scroll_active = false
+		dbox.scroll_following = true
 
 func get_dialog_box():
 	return dbox

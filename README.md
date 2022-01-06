@@ -95,6 +95,10 @@ You need to download the Godot export template to export your game. In addition,
 ### Known issues:
 
 1. Mac export will be considered corrupted. Most likely you will need to do the command line trick to run it.
+2. vn.show_chosen_choices works if all choices lead to different branches, will not work if choice A and choice B lead to the same block. (No bug, but if choice A and choice B lead to the same block, then the system will think choice B is chosen when only choice A is.)
+3. vn.Files.get_progress() will return the percentage of text read. It will overestimate if you have in-block one-line 'fake branches'. (events of the form {uid : dialog, condition:...})
+
+Issue 2 and 3 can be avoided by adding some more branches.
 
 
 ### Documentations

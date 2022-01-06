@@ -37,7 +37,7 @@ func fadein(path:String, time:float, vol:float = 0.0):
 	$bgm1.play()
 	
 	
-func play_sound(path, vol = 0):
+func play_sound(path, vol:float = 0.0):
 	$sound.volume_db = vol
 	$sound.stream = load(path)
 	$sound.play()

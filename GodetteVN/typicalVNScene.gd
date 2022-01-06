@@ -22,5 +22,7 @@ func _ready():
 		
 		#fileRelated.reset_all_spoilerproof()
 		
+		print(vn.Files.get_progress())
+		
 	else:
 		print("Start scene failed due to problems with dialog json file.")

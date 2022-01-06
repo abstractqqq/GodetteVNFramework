@@ -12,6 +12,7 @@ bus = "BGM"
 bus = "Effects"
 
 [node name="voice" type="AudioStreamPlayer" parent="."]
+bus = "Voice"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 
