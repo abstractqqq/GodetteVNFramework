@@ -62,7 +62,7 @@ func set_dialog(words:String, cps:float = vn.cps, extend:bool = false, beep:bool
 		
 	_target_leng = text.length()
 	if cps < 0.015:
-		bbcode_text = vn.Pgs.playback_events['speech'] 
+		bbcode_text = vn.Pgs.playback_events['speech']
 		visible_characters = _target_leng
 		adding = false
 		return

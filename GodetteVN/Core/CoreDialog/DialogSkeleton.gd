@@ -167,17 +167,16 @@ func express(combine:String):
 	return uid
 	
 #---------------------- Camera, Character, Background --------------------------
-func camera_effect(ev:Dictionary) -> String:
+func camera_effect(ev:Dictionary):
 	var action : String = ev['camera']
 	match action:
 		"vpunch", "hpunch", "shake": action = 'shake' 
 		"reset", '': action = 'reset'
-		"zoom", 'move', 'spin': pass 
+		"zoom", 'move', 'spin': pass
 		_:
 			print("!!! Unknown camera event: " + str(ev))
 			push_error("Camera effect format error.")
 	camera.call("camera_%s"%action, ev)
-	return action
 
 func character_event(ev:Dictionary) -> void:
 	var temp:PoolStringArray = ev['chara'].split(" ")
@@ -209,11 +208,12 @@ func character_event(ev:Dictionary) -> void:
 			print("!!! Is there a typo in your code?")
 			push_error("Character event format error.")
 
-func change_background(ev : Dictionary) -> void:
+# Change background, returns true or false. true: we need to yield, false: no need.
+func change_background(ev : Dictionary):
 	var path:String = ev['bg']
 	if ev.size() == 1 or vn.skipping or vn.inLoading:
 		bg.bg_change(path)
-		screen.emit_signal("transition_finished")
+		return false
 	else: # size > 1
 		var eff_name:String=""
 		for k in ev:
@@ -227,6 +227,7 @@ func change_background(ev : Dictionary) -> void:
 		var color:Color = _u.has_or_default(ev, 'color', Color.black)
 		clear_boxes()
 		screen.screen_transition("full",eff_name,color,eff_dur,path)
+		return true
 
 #------------------------------ Related to Dvar --------------------------------
 func set_dvar(ev : Dictionary) -> void:

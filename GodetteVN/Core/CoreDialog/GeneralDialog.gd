@@ -52,10 +52,7 @@ func interpret_events(event:Dictionary):
 		3: change_background(ev)
 		4: .character_event(ev)
 		5: change_weather(ev['weather'])
-		6: 
-			var action:String = .camera_effect(ev)
-			if action in ['zoom','move','spin']:
-				QM.reset_skip()
+		6: .camera_effect(ev)
 		7: express(ev['express'])
 		8: .play_bgm(ev)
 		9: .play_sound(ev)
@@ -229,11 +226,11 @@ func say(uid:String, words:String, cps:float=vn.cps, args:Dictionary={}):
 			cur_db.set_dialog(words, cps, false, use_beep)
 			just_loaded = false
 		else:
-			cur_db.set_dialog(words, cps, false, use_beep)
-			# ---
 			var t:String = _process_inline_symbols(words)
 			vn.Pgs.playback_events['speech'] = t
 			_to_hist(!use_beep and vn.voice_to_history, uid, t)
+			# ---
+			cur_db.set_dialog(words, cps, false, use_beep)
 		
 		stage.set_highlight(uid)
 	wait_for_accept(args['wait'])
@@ -356,7 +353,7 @@ func on_rollback(): # First prepare to rollback... ...
 	vn.Pgs.playback_events = last['playback']
 	vn.Chs.chara_name_patch = last['name_patches']
 	vn.Chs.patch_display_names()
-	current_block = vn.Pgs.currentBlock
+	current_bname = vn.Pgs.currentBlock
 	current_index = vn.Pgs.currentIndex
 	current_block = all_blocks[vn.Pgs.currentBlock]
 	load_playback(vn.Pgs.playback_events, true)
@@ -415,10 +412,11 @@ func load_playback(play_back:Dictionary, RBM:bool = false): # Roll Back Mode
 	just_loaded = true
 
 #------------------- Related to Background and Godot Scene Change ----------------------
-func change_background(ev : Dictionary) -> void:
-	.change_background(ev)
+func change_background(ev : Dictionary):
+	var need_2_yield:bool = .change_background(ev)
 	vn.Pgs.playback_events['bg'] = ev['bg']
-	yield(screen,"transition_finished")
+	if need_2_yield:
+		yield(screen,"transition_finished")
 	auto_load_next(!vn.inLoading)
 
 #----------------------------- Screen and Camera effects-----------------------
@@ -706,7 +704,7 @@ func _input(ev:InputEvent):
 		if hide_vnui:
 			hide_UI(true) # Show UI
 		# vn_accept is mouse left click
-		if ev.is_action_pressed('vn_accept'):
+		if ev.is_action_pressed('vn_accept'): # mouse
 			if vn.auto_on or vn.skipping:
 				if not vn.noMouse:
 					QM.reset_auto_skip()
@@ -715,6 +713,7 @@ func _input(ev:InputEvent):
 					check_dialog()
 		else: # not mouse
 			if vn.auto_on or vn.skipping:
+				cur_db.force_finish()
 				QM.reset_auto_skip()
 			if not (vn.inNotif or vn.inSetting):
 				check_dialog()

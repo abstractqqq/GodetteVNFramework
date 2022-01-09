@@ -111,7 +111,6 @@ var choice_blocks = {'food': food_choices}
 #---------------------------------------------------------------------
 func _ready():
 	start_scene(dialog_blocks, choice_blocks, {}, vn.Pgs.load_instruction)
-	print(vn.Pgs.currentNodePath)
 
 #---------------------------------------------------------------------
 

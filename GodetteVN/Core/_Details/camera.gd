@@ -136,12 +136,11 @@ func camera_zoom(ev:Dictionary) -> void:
 	if t < 0.05 or mode == 'instant' or vn.skipping: 
 		zoom(zm, target_offset)
 	else:
-		var m:int = vn.Utils.movement_type(mode)
 		var tween:OneShotTween = OneShotTween.new()
 		tween.name = 'zm'
 		add_child(tween)
 		var _e:int = tween.interpolate_property(self, "zoom", self.zoom, zm, t,
-			m, Tween.EASE_IN_OUT)
+			vn.Utils.movement_type(mode), Tween.EASE_IN_OUT)
 		_e = tween.start()
 
 func zoom(zm:Vector2, off = Vector2(1,1)) -> void:
