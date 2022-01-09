@@ -3,72 +3,47 @@ extends Node
 var bgm:String = ''
 
 func play_bgm(path:String, vol:float = 0.0):
-	finish_anim()
+	bgm = path
 	$bgm1.stop()
 	$bgm1.volume_db = vol
-	$bgm1.stream = load(path)
+	$bgm1.stream = load(vn.BGM_DIR + path)
 	$bgm1.play()
 	
-func fadeout(time:float):
-	finish_anim()
+func fadeout(time:float, type:String="linear"):
+	for c in $bgm1.get_children():
+		if c is OneShotTween:
+			c.queue_free()
 	bgm = ''
 	var vol:float = $bgm1.volume_db
-	var animation:Animation = Animation.new()
-	var track_index:int = animation.add_track(Animation.TYPE_VALUE)
-	animation.track_set_path(track_index, "bgm1:volume_db")
-	animation.set_length(time)
-	animation.track_insert_key(track_index, 0, vol)
-	animation.track_insert_key(track_index, time, -80)
-	$AnimationPlayer.add_animation("fadeout", animation)
-	$AnimationPlayer.play("fadeout")
+	var tw:OneShotTween = OneShotTween.new()
+	var _e:bool = tw.interpolate_property($bgm1,"volume_db",vol, -80.0,time,
+		vn.Utils.movement_type(type), Tween.EASE_OUT)
+	add_child(tw)
+	_e = tw.start()
 
-func fadein(path:String, time:float, vol:float = 0.0):
-	finish_anim()
+func fadein(path:String, time:float, vol:float = 0.0, type:String="linear"):
+	for c in $bgm1.get_children():
+		if c is OneShotTween:
+			c.queue_free()
+	
 	$bgm1.stop()
-	$bgm1.stream = load(path)
-	var animation:Animation = Animation.new()
-	var track_index:int = animation.add_track(Animation.TYPE_VALUE)
-	animation.track_set_path(track_index, "bgm1:volume_db")
-	animation.set_length(time)
-	animation.track_insert_key(track_index, 0, -80)
-	animation.track_insert_key(track_index, time, vol)
-	$AnimationPlayer.add_animation("fadein", animation)
-	$AnimationPlayer.play("fadein")
+	$bgm1.stream = load(vn.BGM_DIR + path)
 	$bgm1.play()
+	var tw:OneShotTween = OneShotTween.new()
+	var _e:bool = tw.interpolate_property($bgm1,"volume_db",-80.0,vol,time,
+		vn.Utils.movement_type(type), Tween.EASE_IN)
+	$bgm1.add_child(tw)
+	_e = tw.start()
 	
-	
-func play_sound(path, vol:float = 0.0):
-	$sound.volume_db = vol
-	$sound.stream = load(path)
-	$sound.play()
-	
-func play_voice(path, vol = 0):
-	$voice.stop()
-	$voice.volume_db = vol
-	$voice.stream = load(path)
-	$voice.play()
-	
-func stop_voice():
-	$voice.stop()
+func play_sound(path:String, vol:float = 0.0, b:String="Effects", dir:String=vn.AUDIO_DIR):
+	var v:AudioStreamPlayer = AudioStreamPlayer.new()
+	v.volume_db = vol
+	v.bus = b
+	v.stream = load(dir + path)
+	var _e:int = v.connect("finished",v,"queue_free")
+	add_child(v)
+	v.play()
 
 func stop_bgm():
 	bgm = ''
 	$bgm1.stop()
-	
-func pause_bgm():
-	$bgm1.set_stream_paused(true)
-	
-func resume_bgm():
-	$bgm1.set_stream_paused(false)
-
-func finish_anim():
-	var cur_anim:String = $AnimationPlayer.current_animation
-	if cur_anim == "fadein":
-		$AnimationPlayer.stop()
-		$AnimationPlayer.remove_animation(cur_anim)
-	elif cur_anim != '':
-		var delta:float = $AnimationPlayer.current_animation_length - $AnimationPlayer.current_animation_position
-		$AnimationPlayer.advance(delta+1)
-
-func _on_AnimationPlayer_animation_finished(anim_name):
-	$AnimationPlayer.remove_animation(anim_name)

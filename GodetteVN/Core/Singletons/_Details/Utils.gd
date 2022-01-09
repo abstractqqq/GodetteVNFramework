@@ -31,21 +31,19 @@ func call_premade_events(key:String) -> Dictionary:
 # Other functions that might be used globally
 
 func movement_type(type:String)-> int:
-	var m:int = 0
-	match type:
-		"linear": m = 0
-		"sine": m = 1
-		"quint": m = 2
-		"quart": m = 3
-		"quad": m = 4
-		"expo": m = 5
-		"elastic": m = 6
-		"cubic": m = 7
-		"circ": m = 8
-		"bounce": m = 9
-		"back" : m = 10
-		_: m = 0
-	return m
+	match type.to_lower():
+		"linear": return Tween.TRANS_LINEAR
+		"sine": return Tween.TRANS_SINE
+		"quint": return Tween.TRANS_QUINT
+		"quart": return Tween.TRANS_QUART
+		"quad": return Tween.TRANS_QUAD
+		"expo": return Tween.TRANS_EXPO
+		"elastic": return Tween.TRANS_ELASTIC
+		"cubic": return Tween.TRANS_CUBIC
+		"circ": return Tween.TRANS_CIRC
+		"bounce": return Tween.TRANS_BOUNCE
+		"back" : return Tween.TRANS_BACK
+		_: return 0
 
 #----------------------------------------------------------------
 
@@ -235,10 +233,10 @@ func read(s, json:bool=false):
 			return s
 
 #---------------------------------------------------------------------
-func eliminate_special_symbols(s:String, pattern_to_kill:String, all:bool=true,
+func replace_special_symbols(s:String, pattern:String, by:String='', all:bool=true,
 	offset:int = 0) -> String:
-	var _e:int = regex.compile(pattern_to_kill) # "(?<!\\\\)_")
-	return regex.sub(s, "", all, offset)
+	var _e:int = regex.compile(pattern) # "(?<!\\\\)_")
+	return regex.sub(s, by, all, offset)
 
 #---------------------------------------------------------------------
 # Used if you only want your parameters to be between 0 and 1.

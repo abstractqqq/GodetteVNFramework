@@ -19,8 +19,10 @@ func _on_newGameButton_pressed():
 
 func _on_loadButton_pressed():
 	add_child(load(vn.LOAD_PATH).instance())
-	
-# Game Update Behavior
+
+# Ideally, you wouldn't need this function. If you need this, you're probably
+# working on a bigger project than you think.
+# Game Update Behavior ???
 # When launching your updated game, you should still be able to use your
 # previous save data. But we might need to make some changes to the save
 # data. 
@@ -41,9 +43,9 @@ func update_saves():
 			# update version of the save
 			# Depending on the update, you might want to deprecate the saves.
 			data['GAME_VERSION'] = vn.GAME_VERSION 
-			var b:String = data['currentBlock']
-			var idx:int = data['currentIndex']
-			var scene:String = data['currentNodePath']
+			var _b:String = data['currentBlock']
+			var _idx:int = data['currentIndex']
+			var _scene:String = data['currentNodePath']
 			if ver == "0.0" and vn.GAME_VERSION == "0.01": # For example, there is
 				# a version difference... ...
 				data['history'] = []

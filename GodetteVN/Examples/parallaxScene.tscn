@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=2]
 
-[ext_resource path="res://GodetteVN/Core/_Details/background.tscn" type="PackedScene" id=2]
+[ext_resource path="res://GodetteVN/Core/_Details/VNBackground.tscn" type="PackedScene" id=2]
 [ext_resource path="res://GodetteVN/Core/VNUI.tscn" type="PackedScene" id=3]
 [ext_resource path="res://GodetteVN/Examples/parallaxScene.gd" type="Script" id=4]
 [ext_resource path="res://assets/backgrounds/p6.png" type="Texture" id=5]
@@ -15,8 +15,8 @@
 [node name="parallaxScene" type="Node2D"]
 script = ExtResource( 4 )
 debug_mode = true
-scene_description = "Parallax Example"
 float_text = "res://GodetteVN/fundamentals/details/floatText.tscn"
+scene_description = "Parallax Example"
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 script = ExtResource( 12 )
@@ -75,7 +75,7 @@ motion_mirroring = Vector2( 1980, 0 )
 texture = ExtResource( 11 )
 centered = false
 
-[node name="background" parent="." instance=ExtResource( 2 )]
+[node name="VNBackground" parent="." instance=ExtResource( 2 )]
 visible = false
 
 [node name="VNUI" parent="." instance=ExtResource( 3 )]

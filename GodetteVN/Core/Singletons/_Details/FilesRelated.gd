@@ -173,6 +173,7 @@ func load_config():
 	vn.auto_time = system_data['auto_time']
 	
 func regiester_dialog_json(fpath:String, spoiler_proof:bool=true):
+	# Will make this dialog_json spolier-proof.
 	if system_data.has(fpath) or system_data.has(fpath+'_size'):
 		return 
 	if fpath.ends_with(".json"):
@@ -202,13 +203,13 @@ func _find_num_dialogs(block:Array) -> int:
 	for ev in block:
 		if ev.has('condition'):
 			var new_ev:Dictionary = ev.duplicate()
-			var ok:bool = new_ev.erase('condition')
+			var _ok:bool = new_ev.erase('condition')
 			if vn.event_reader(new_ev) == -1:
 				m += 1
 		elif vn.event_reader(ev) == -1:
 			m += 1
 	return m
-		
+	
 func reset_all_spoilerproof():
 	var regex:RegEx = RegEx.new()
 	var _e:int = regex.compile("(^(res://)(.+)(\\.tscn)$)|(\\.json)$")

@@ -20,6 +20,7 @@ signal load_next
 signal all_visible
 
 func _ready():
+	beep_path = beep_path.split("/")[-1]
 	var _e:int = vn.get_node("GlobalTimer").connect("timeout",self, "_on_global_timeout")
 	var sb:VScrollBar = get_v_scroll()
 	_e = sb.connect("mouse_entered", vn.Utils, "no_mouse")
@@ -68,7 +69,7 @@ func force_finish():
 	
 func _on_Timer_timeout():
 	visible_characters += 1
-	if _beep: music.play_voice(beep_path)
+	if _beep: music.play_sound(beep_path,0.0,'Voice',vn.VOICE_DIR)
 	if visible_characters >= _target_leng:
 		force_finish()
 

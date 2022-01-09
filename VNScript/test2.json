@@ -13,11 +13,6 @@
 				"loc": "1600 600"
 			},
 			{
-				"bgm":"myuu-angels.mp3",
-				"fadein":3,
-				"vol":-25
-			},
-			{
 				"female": "EEEEEE",
 				"condition": [
 					[
@@ -26,6 +21,12 @@
 					],
 					"tt"
 				]
+			},
+			{
+				"bgm":"myuu-angels.mp3",
+				"fadein":3,
+				"vol":-15,
+				"type":"bounce"
 			},
 			{
 				"female": "Hello there. Let me introduce you to the system.",

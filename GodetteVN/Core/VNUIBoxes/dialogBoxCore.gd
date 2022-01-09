@@ -27,6 +27,7 @@ signal load_next
 signal all_visible
 
 func _ready():
+	beep_path = beep_path.split("/")[-1]
 	for f in DEFAULT_FONTS:
 		DEFAULT_FONTS[f] = get('custom_fonts/%s_font'%f)
 	
@@ -45,7 +46,7 @@ func set_chara_fonts(ev:Dictionary):
 		if ev[key] != '':
 			add_font_override(key, load(ev[key]))
 
-func set_dialog(words : String, cps:float = vn.cps, extend:bool = false, beep:bool = false):
+func set_dialog(words:String, cps:float = vn.cps, extend:bool = false, beep:bool = false):
 	# words will be already preprocessed
 	#eod = false
 	_lastPctIdx = -1
@@ -60,9 +61,9 @@ func set_dialog(words : String, cps:float = vn.cps, extend:bool = false, beep:bo
 		bbcode_text = words
 		
 	_target_leng = text.length()
-	if cps <= 0:
+	if cps < 0.015:
 		bbcode_text = vn.Pgs.playback_events['speech'] 
-		visible_characters = -1
+		visible_characters = _target_leng
 		adding = false
 		return
 	
@@ -72,6 +73,7 @@ func set_dialog(words : String, cps:float = vn.cps, extend:bool = false, beep:bo
 	
 func force_finish():
 	$Timer.stop()
+	_beep = false
 	while adding:
 		_on_Timer_timeout()
 		# visible_characters = _target_leng  # + len(eod_str)
@@ -116,11 +118,11 @@ func _on_Timer_timeout():
 		# print(text[cur], " Delay : ", delay)
 		if valid:
 			if pattern == "%":
-				bbcode_text = vn.Utils.eliminate_special_symbols(bbcode_text, pattern, false, _lastPctIdx+1)
+				bbcode_text = vn.Utils.replace_special_symbols(bbcode_text, pattern, '', false, _lastPctIdx+1)
 			elif pattern == "_":
-				bbcode_text = vn.Utils.eliminate_special_symbols(bbcode_text, pattern, false, _lastUnderscoreIdx+1)
+				bbcode_text = vn.Utils.replace_special_symbols(bbcode_text, pattern, '',false, _lastUnderscoreIdx+1)
 			elif pattern == "\\\\":
-				bbcode_text = vn.Utils.eliminate_special_symbols(bbcode_text, pattern, false, _lastSlashIdx+1)
+				bbcode_text = vn.Utils.replace_special_symbols(bbcode_text, pattern, '',false, _lastSlashIdx+1)
 			_target_leng -= 1
 	elif _grouping:
 		visible_characters = text.length()
@@ -128,8 +130,6 @@ func _on_Timer_timeout():
 		return 
 
 	_add_visible(delay)
-		#eod = true
-		#bbcode_text += eod_str
 
 func _add_visible(delay:bool = false):
 	if not delay:
@@ -139,7 +139,7 @@ func _add_visible(delay:bool = false):
 			_groupedWord = ''
 		else:
 			visible_characters += (1 + _groupSize)
-			if _beep: music.play_voice(beep_path)
+			if _beep: music.play_sound(beep_path,0.0,'Voice',vn.VOICE_DIR)
 		if visible_characters >= _target_leng:
 			_grouping = false
 			_groupSize = 0

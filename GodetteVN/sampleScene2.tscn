@@ -2,16 +2,16 @@
 
 [ext_resource path="res://GodetteVN/sampleScene2.gd" type="Script" id=1]
 [ext_resource path="res://GodetteVN/Core/VNUI.tscn" type="PackedScene" id=2]
-[ext_resource path="res://GodetteVN/Core/_Details/background.tscn" type="PackedScene" id=4]
+[ext_resource path="res://GodetteVN/Core/_Details/VNBackground.tscn" type="PackedScene" id=4]
 
 [node name="sample2" type="Node2D"]
 script = ExtResource( 1 )
 debug_mode = true
 scene_description = "Introduction to System 2"
 
-[node name="background" parent="." instance=ExtResource( 4 )]
+[node name="VNBackground" parent="." instance=ExtResource( 4 )]
 
 [node name="VNUI" parent="." instance=ExtResource( 2 )]
 use_scroll = false
 
-[connection signal="bg_changed" from="background" to="." method="_on_bg_changed"]
+[connection signal="bg_changed" from="VNBackground" to="." method="_on_bg_changed"]

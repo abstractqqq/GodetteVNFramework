@@ -2,7 +2,7 @@
 
 [ext_resource path="res://GodetteVN/Examples/investigationScene.gd" type="Script" id=1]
 [ext_resource path="res://GodetteVN/Core/VNUI.tscn" type="PackedScene" id=2]
-[ext_resource path="res://GodetteVN/Core/_Details/background.tscn" type="PackedScene" id=4]
+[ext_resource path="res://GodetteVN/Core/_Details/VNBackground.tscn" type="PackedScene" id=4]
 [ext_resource path="res://GodetteVN/ClickableObjects/clickableObject1.tscn" type="PackedScene" id=5]
 [ext_resource path="res://GodetteVN/ClickableObjects/clickableObject2.tscn" type="PackedScene" id=6]
 
@@ -12,7 +12,7 @@ debug_mode = true
 choice_bar = "res://GodetteVN/Core/choiceBar.tscn"
 float_text = "res://GodetteVN/Core/details/floatText.tscn"
 
-[node name="background" parent="." instance=ExtResource( 4 )]
+[node name="VNBackground" parent="." instance=ExtResource( 4 )]
 
 [node name="clickables" type="Node2D" parent="."]
 

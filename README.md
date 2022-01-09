@@ -51,7 +51,7 @@ from there. Same deal with dvars.
 There are 3 core components in this framework.
 1. An actor editor (WIP, mostly stable for written functions) 
 2. A script editor (WIP, mostly stable for written functions)
-3. A core dialog system (basically a json interpreter, mostly stable)  
+3. Multiple core dialog systems (In progress)  
 
 Transition system is integrated from eh-jogos's project. You can find it [here](https://github.com/eh-jogos/eh_Transitions)
 
@@ -75,6 +75,16 @@ Projects done with this template:
 
 More in the making ~
 
+-----------------------------------
+### Dialog Systems
+
+0. DialogSkeleton:
+    The base system to build your own dialog system.
+1. GeneralDialog:
+    A general dialog system, which includes everything showcased in my videos and rollback.
+2. LiteDialog:
+    No QM, no nvl, no right click, no scroll control, no save (make your own save system that only allows saving when not talking), no rollback, no sideimage, no center, no call_method, no history manipulation, stores history but you need to connect to history screen by yourself. Suitable for RPGs. Does not keep track of any dialog progress either.
+
 ------------------------------------------------------------------------------------------------------------------------------
 ### Default Controls:
 
@@ -92,11 +102,14 @@ You need to download the Godot export template to export your game. In addition,
 
 ![Exporting](/Showcases/exporting.png)
 
+-----------------------------
+
 ### Known issues:
 
 1. Mac export will be considered corrupted. Most likely you will need to do the command line trick to run it.
 2. vn.show_chosen_choices works if all choices lead to different branches, will not work if choice A and choice B lead to the same block. (No bug, but if choice A and choice B lead to the same block, then the system will think choice B is chosen when only choice A is.)
 3. vn.Files.get_progress() will return the percentage of text read. It will overestimate if you have in-block one-line 'fake branches'. (events of the form {uid : dialog, condition:...})
+4. For Visual Novels, it is recommended you use only one json file per scene. It is possible to change dialog json file by code and use the same scene, but this might cause some problems if your dialog is spoiler-proof (not skippable if not read before.)
 
 Issue 2 and 3 can be avoided by adding some more branches.
 

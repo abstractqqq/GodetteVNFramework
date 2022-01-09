@@ -82,9 +82,9 @@ func updateRollback():
 func remove_nonmatch_records(): # Read the comments carefully if you want to use this function.
 	# remove all rollback records that are not in current block.
 	# Will check from the end, and remove everything before the last entry
-	# to the current block. This means if we went from block A(1) to block B(2) and then
-	# to block A(3) and then to block B(4), only records that happened in (4)
-	# will be kept. 
+	# to the current block. This means if we went from block A to block B and then
+	# to block A and then to block B, only records that happened from the second A to
+	# the second B will be kept. 
 	var j:int = rollback_records.size()
 	var constant:int = j
 	for i in range(j):
@@ -98,6 +98,9 @@ func remove_nonmatch_records(): # Read the comments carefully if you want to use
 func checkSkippable()->bool:
 	if vn.Files.system_data.has(currentNodePath):
 		if currentIndex > vn.Files.system_data[currentNodePath][currentBlock]:
+			return false
+	elif vn.Scene.dialog_json != '' and vn.Files.system_data.has(vn.Scene.dialog_json):
+		if currentIndex > vn.Files.system_data[vn.Scene.dialog_json][currentBlock]:
 			return false
 	return true
 

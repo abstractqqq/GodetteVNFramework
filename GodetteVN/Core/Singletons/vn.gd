@@ -13,6 +13,7 @@ const voice_to_history:bool = true # Should voice be replayable in history?
 # Do you want to use a different color for chosen choices? Only works
 # if the scene is made spoilerproof.
 const show_chosen_choices:bool = true
+const chosen_color:Color = Color("#535252")
 
 #-----------------
 const GAME_VERSION:String = "0.0"
