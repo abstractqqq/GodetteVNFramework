@@ -126,7 +126,7 @@ func say(uid:String, words:String, cps:float=vn.cps, args:Dictionary={}):
 	vn.Pgs.playback_events['speech'] = t
 	# Keeps history just in case
 	_to_hist(!use_beep and vn.voice_to_history, uid, t)
-	stage.set_highlight(uid)
+	stage.set_focus(uid)
 	wait_for_accept(args['wait'])
 
 func extend(ev:Dictionary):
@@ -156,7 +156,7 @@ func extend(ev:Dictionary):
 		# Need to track this 
 		vn.Pgs.playback_events['speech'] += " " + t
 			
-		stage.set_highlight(prev_speaker)
+		stage.set_focus(prev_speaker)
 		# wait for accept
 		wait_for_accept(_u.has_or_default(ev,'wait',0))
 
