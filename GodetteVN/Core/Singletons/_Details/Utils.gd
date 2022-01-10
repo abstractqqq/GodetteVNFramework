@@ -29,7 +29,6 @@ func call_premade_events(key:String) -> Dictionary:
 # End of premade events section
 #-------------------------------------------------------------------------
 # Other functions that might be used globally
-
 func movement_type(type:String)-> int:
 	match type.to_lower():
 		"linear": return Tween.TRANS_LINEAR

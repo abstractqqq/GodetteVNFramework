@@ -8,7 +8,6 @@ export(String) var display_name
 export(String) var unique_id
 export(Color) var name_color = null
 export(bool) var in_all = true
-export(bool) var apply_highlight = true
 export(bool) var fade_on_change = false
 export(float, 0.1, 1) var fade_time = 0.6
 export(bool) var use_character_font = false
@@ -60,7 +59,7 @@ func change_scale(sc:Vector2, t:float, type:String="linear"):
 	target_sc = Vector2(abs(sc.x), abs(sc.y))
 	var tween:OneShotTween = OneShotTween.new()
 	tween.name = "sc"
-	var _e = tween.interpolate_property(self,'scale',scale, target_sc,t,\
+	var _e:bool = tween.interpolate_property(self,'scale',scale, target_sc,t,\
 		vn.Utils.movement_type(type), Tween.EASE_IN_OUT)
 	add_child(tween)
 	_e = tween.start()
@@ -96,7 +95,7 @@ func fadein(time : float, expression:String=""):
 	_fading = true
 	var tween:OneShotTween = OneShotTween.new(self, "set", ["_fading", false])
 	add_child(tween)
-	_e = tween.interpolate_property(self, "modulate", Color(0,0,0,0), vn.DIM, time,
+	_e = tween.interpolate_property(self, "modulate", Color(0,0,0,0), stage.DIM, time,
 		Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
 	_e = tween.start()
 	

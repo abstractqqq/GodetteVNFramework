@@ -453,7 +453,6 @@ func _check_voice(ev:Dictionary)->bool:
 	return false
 	
 func _to_hist(has_v:bool, who:String, text:String)->void:
-	# t.replace("\\_", "_").replace("\\%", "%")
 	if has_v: 
 		vn.Pgs.updateHistory([who, text, latest_voice])
 	else: 
@@ -465,7 +464,7 @@ func _process_inline_symbols(text:String):
 
 func dimming(c : Color):
 	bg.modulate = c
-	stage.set_modulate_4_all(c)
+	stage.set_modulate_all(c)
 	
 func generate_nullify():
 	# Suppose you're in an invetigation scene. Speaker A says something, then 

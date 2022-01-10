@@ -29,13 +29,8 @@ const ThumbnailFormat:int = Image.FORMAT_RGB8
 # Encryption password used for saves
 const PASSWORD:String = "nanithefuck!"
 
-# Dim color
-const DIM:Color = Color(0.86,0.86,0.86,1) # Dimming of non talking characters
-const CENTER_DIM:Color = Color(0.7,0.7,0.7,1) # Dimming in center mode
-const NVL_DIM:Color= Color(0.2,0.2,0.2,1) # Dimming in NVL mode
-
 #Skip speed, multiple of 0.05
-const SKIP_SPEED:int = 3 # 3 means 1 left-click per 3 * 0.05 = 0.15 s
+export(int, 2, 5, 1) var SKIP_SPEED = 3 # 3 means 1 left-click per 3 * 0.05 = 0.15 s
 
 # Transitions
 const TRANSITIONS_DIR:String = "res://GodetteVN/Core/_Details/Transition_Data/"
@@ -51,15 +46,15 @@ var BAD_NAMES:Dictionary = {"nl":true, "sm":true, 'dc':true,'color':true, 'true'
 var BAD_UIDS:Dictionary = {'all':true, '':true, 'voice':true, 'speed':true,'_':true, 'wait':true}
 
 # --------------------------- Other Game Variables ------------------------
-# Need refactor
+
+# Default CPS
+export(float, 5.0, 80.0, 1.0) var cps = 36.0
+var cps_map:Dictionary = {'fast':50.0, 'normal':cps, 'slow':20.0, 'instant':0.0, 'slower':10.0}
+# Auto Forward
 var auto_on:bool = false # Auto forward or not
 var auto_time:int = 1 # default val is 1 because in setting screen
 # normal has index 1, which means 2s. Slow has index 0, which means 3 seconds
 # and fast has index 2 which means 1s.
-
-# Default CPS
-var cps : float = 36.0
-var cps_map:Dictionary = {'fast':50.0, 'normal':cps, 'slow':20.0, 'instant':0.0, 'slower':10.0}
 
 # ---------------------------- Dvar Varibles ----------------------------
 

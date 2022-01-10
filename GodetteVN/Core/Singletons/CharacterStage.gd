@@ -1,5 +1,20 @@
 extends Node
 
+# Applies highlight/scale to talking characters
+export(bool) var apply_highlight = true
+export(bool) var apply_scale = true
+
+# Dim color
+export(Color) var FOCUS = Color(1,1,1,1)
+export(Color) var DIM = Color(0.86,0.86,0.86,1) # Dimming of non talking characters
+export(Color) var CENTER_DIM = Color(0.7,0.7,0.7,1) # Dimming in center mode
+export(Color) var NVL_DIM = Color(0.2,0.2,0.2,1) # Dimming in NVL mode
+
+# Focus Scale
+export(Vector2) var FOCUS_SCALE = Vector2(1.05,1.05)
+export(Vector2) var DEFAULT_SCALE = Vector2(1,1)
+
+var _last_focused_uid:String = ''
 const direction = {'up': Vector2.UP, 'down': Vector2.DOWN, 'left': Vector2.LEFT, 'right': Vector2.RIGHT}
 
 # A duplicate method only for convenience.
@@ -81,7 +96,6 @@ func character_move(uid:String, ev:Dictionary):
 		print("!!! Warning: Attempting to move all character at once.")
 		print("!!! This is currently not allowed and this event is ignored.")
 		return
-	
 	var type:String = MyUtils.has_or_default(ev,'type','linear')
 	var expr:String = MyUtils.has_or_default(ev,'expression','')
 	var c:Character = find_chara_on_stage(uid)
@@ -108,10 +122,6 @@ func character_fadein(uid: String, ev:Dictionary) -> void:
 		else:
 			var c:Character = load(info['path']).instance()
 			# If load fails, there will be a bug pointing to this line
-			if c.apply_highlight:
-				c.modulate = vn.DIM
-			else:
-				c.modulate = Color(1,1,1,1)
 			c.modulate.a = 0
 			c.loc = ev['loc']
 			c.position = ev['loc']
@@ -141,7 +151,10 @@ func character_join(uid: String, ev:Dictionary):
 		if c.change_expression(expr):
 			c.position = ev['loc']
 			c.loc = ev['loc']
-			c.modulate = vn.DIM
+			if apply_highlight:
+				c.modulate = DIM
+			if apply_scale:
+				c.scale = DEFAULT_SCALE
 
 func character_add(uid:String, ev:Dictionary):
 	var pt_name:String 
@@ -152,7 +165,6 @@ func character_add(uid:String, ev:Dictionary):
 	else:
 		print("!!! Character add event format error.")
 		push_error('Character add expects "path" and "at" fields.')
-	
 	if uid == 'all':
 		for c in $characters.get_children():
 			if c is Character and c.in_all:
@@ -167,18 +179,30 @@ func character_add(uid:String, ev:Dictionary):
 				n.add_child(load(path).instance())
 				break
 
-func set_highlight(uid : String) -> void:
-	var info:Dictionary = vn.Chs.all_chara[uid]
-	if info.has('path'):
-		for n in $characters.get_children():
-			if n is Character and n.unique_id == uid and n.apply_highlight and not n.is_fading():
-				n.modulate = Color(1,1,1,1)
-				break
-
-func remove_highlight() -> void:
+func set_focus(uid:String, c:Color=FOCUS, sc:Vector2=FOCUS_SCALE) -> void:
+	var ch:Character = find_chara_on_stage(uid)
+	if ch: # and not ch.is_fading():
+		if apply_highlight and not ch.is_fading():
+			ch.modulate = c
+		if apply_scale and uid != _last_focused_uid:
+			var u:Character = find_chara_on_stage(_last_focused_uid)
+			if vn.skipping:
+				ch.scale = sc
+				ch.target_sc = sc
+				if u:
+					u.scale = DEFAULT_SCALE
+					u.target_sc = DEFAULT_SCALE
+			else:
+				ch.change_scale(sc, 0.1)
+				if u:
+					u.change_scale(DEFAULT_SCALE, 0.1)
+			_last_focused_uid = uid
+				
+func set_modulate_all(c:Color=DIM):
 	for n in $characters.get_children():
-		if n is Character and n.apply_highlight:
-			n.modulate = vn.DIM
+		if n is Character:
+			if apply_highlight:
+				n.modulate = c
 
 func character_leave(uid : String):
 	if uid == 'absolute_all':
@@ -190,10 +214,6 @@ func character_leave(uid : String):
 	else:
 		find_chara_on_stage(uid).call_deferred("free")
 
-func set_modulate_4_all(c : Color):
-	for n in $characters.get_children():
-		if n is Character and n.apply_highlight:
-			n.modulate = c
 
 func find_chara_on_stage(uid:String)->Character:
 	for n in $characters.get_children():

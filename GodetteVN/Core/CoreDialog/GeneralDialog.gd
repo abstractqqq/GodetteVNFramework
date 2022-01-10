@@ -135,13 +135,12 @@ func nvl_off():
 	if self.nvl:
 		cur_db.queue_free()
 		cur_db = $VNUI/dialogBox/dialogBoxCore
-		bg.modulate = Color(1,1,1,1)
-		stage.set_modulate_4_all(Color(0.86,0.86,0.86,1))
+		bg.modulate = stage.FOCUS
+		stage.set_modulate_all()
 		self.nvl = false
 		self.centered = false
 
 func nvl_on(font:String=''):
-	stage.set_modulate_4_all(vn.DIM)
 	clear_boxes()
 	hide_boxes()
 	var nvlScene:Node2D = load(nvl_screen).instance()
@@ -153,11 +152,9 @@ func nvl_on(font:String=''):
 	vnui.add_child(nvlScene)
 	if centered:
 		cur_db.center_mode()
-		bg.modulate = vn.CENTER_DIM
-		stage.set_modulate_4_all(vn.CENTER_DIM)
+		dimming(stage.CENTER_DIM)
 	else:
-		bg.modulate = vn.NVL_DIM
-		stage.set_modulate_4_all(vn.NVL_DIM)
+		dimming(stage.NVL_DIM)
 		
 #-------------------------------- ADV Dialog -----------------------------------
 
@@ -232,7 +229,7 @@ func say(uid:String, words:String, cps:float=vn.cps, args:Dictionary={}):
 			# ---
 			cur_db.set_dialog(words, cps, false, use_beep)
 		
-		stage.set_highlight(uid)
+		stage.set_focus(uid)
 	wait_for_accept(args['wait'])
 
 func extend(ev:Dictionary):
@@ -264,7 +261,7 @@ func extend(ev:Dictionary):
 			cur_db.set_dialog(words, cps, true, use_beep)
 			vn.Pgs.playback_events['speech'] += " " + t
 			
-		stage.set_highlight(prev_speaker)
+		stage.set_focus(prev_speaker)
 		# wait for accept
 		wait_for_accept(_u.has_or_default(ev,'wait',0))
 
@@ -278,7 +275,7 @@ func wait_for_accept(wt:float=0):
 		if wt >= 0.05: _u.kill_job('auto_dialog_wait')
 		if allow_rollback: vn.Pgs.makeSnapshot()
 		if centered: nvl_off()
-		if not self.nvl: stage.remove_highlight()
+		if not self.nvl: stage.set_modulate_all()
 		waiting_acc = false
 		auto_load_next()
 	else: # The yield has been nullified, that means some outside code is trying to change dialog blocks
@@ -292,8 +289,8 @@ func check_dialog():
 		hide_vnui = false
 		if self.nvl:
 			cur_db.visible = true
-			if self.centered: dimming(vn.CENTER_DIM)
-			else: dimming(vn.NVL_DIM)
+			if self.centered: dimming(stage.CENTER_DIM)
+			else: dimming(stage.NVL_DIM)
 		else:
 			show_boxes()
 	if cur_db.adding: 
@@ -543,15 +540,15 @@ func hide_UI(show:bool=false):
 		hide_boxes()
 		if self.nvl:
 			cur_db.visible = false
-			dimming(Color(1,1,1,1))
+			dimming(stage.FOCUS)
 	else:
 		if not QM.hiding: QM.visible = true
 		if self.nvl:
 			cur_db.visible = true
 			if self.centered: 
-				dimming(vn.CENTER_DIM)
+				dimming(stage.CENTER_DIM)
 			else: 
-				dimming(vn.NVL_DIM)
+				dimming(stage.NVL_DIM)
 		else:
 			show_boxes()
 
