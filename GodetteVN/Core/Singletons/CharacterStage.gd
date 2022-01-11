@@ -219,9 +219,6 @@ func find_chara_on_stage(uid:String)->Character:
 	for n in $characters.get_children():
 		if n is Character and n.unique_id == uid:
 			return n
-			
-	print('Warning: the character with uid {0} cannot be found or has not joined the stage.'.format({0:uid}))
-	print("Depending on your event, you will get a bug or nothing will be done.")
 	return null
 
 func is_on_stage(uid : String) -> bool:

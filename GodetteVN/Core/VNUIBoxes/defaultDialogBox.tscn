@@ -11,7 +11,7 @@ margin_left = 436.0
 margin_top = 820.0
 margin_right = 1509.0
 margin_bottom = 1004.0
-color = Color( 1, 1, 1, 0.627451 )
+color = Color( 0.0745098, 0.0666667, 0.0666667, 0.627451 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_group_": true,
@@ -36,6 +36,7 @@ margin_top = 9.0
 margin_right = 1047.0
 margin_bottom = 178.0
 mouse_filter = 1
+custom_colors/default_color = Color( 0.74902, 0.74902, 0.74902, 1 )
 custom_fonts/italics_font = ExtResource( 3 )
 custom_fonts/bold_font = ExtResource( 2 )
 custom_fonts/normal_font = ExtResource( 4 )

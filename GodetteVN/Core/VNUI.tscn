@@ -20,6 +20,7 @@ margin_left = 413.0
 margin_top = 767.0
 margin_right = 563.0
 margin_bottom = 810.0
+color = Color( 0.0745098, 0.0666667, 0.0666667, 0.627451 )
 
 [node name="choiceContainer" parent="." instance=ExtResource( 4 )]
 visible = false

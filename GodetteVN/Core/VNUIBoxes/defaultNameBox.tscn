@@ -8,7 +8,7 @@ margin_top = 769.963
 margin_right = 562.752
 margin_bottom = 809.963
 rect_min_size = Vector2( 150, 40 )
-color = Color( 1, 1, 1, 0.627451 )
+color = Color( 0.0745098, 0.0666667, 0.0666667, 0.627451 )
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false

@@ -55,9 +55,9 @@ var choice_blocks = {}
 func _ready():
 	register_dvar_propagation("parallax_speed_change", "parallax_speed")
 	# See comment 1 below
-	start_scene(conversation_blocks, choice_blocks, {})
+	start_scene(conversation_blocks, choice_blocks, {}, vn.Pgs.load_instruction)
 
 func _exit_tree(): # This dvar is only meant to be used in this scene. No
 	# need to carry it to other scenes and cost extra memory.
 	# BTW it is initialized in ParallaxBackground.
-	vn.dvar.erase('parallax_speed')
+	var _e:bool = vn.dvar.erase('parallax_speed')

@@ -16,6 +16,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 beep_path = "res://voice/bleep001.ogg"
+EOD_pic = "res://gui/EOD/progress_0.png"
 
 [node name="Timer" type="Timer" parent="."]
 

@@ -13,5 +13,5 @@ var stage_characters:Array = [
 var spriteless_characters:Array = [
 	{"uid": "vo", 
 	"display_name": "v123", 
-	"name_color":Color.blueviolet}
+	"color":Color.blueviolet}
 ]

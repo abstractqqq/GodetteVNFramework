@@ -5,10 +5,12 @@ extends RichTextLabel
 # Not implemented yet because I cannot find any resource
 # export(bool) var noise_on = false
 export(String, FILE, "*.ogg") var beep_path = ''
+export(String, FILE, "*.png") var EOD_pic = ''
+export(int) var EOD_pic_lengh = 8
 
-var autoCounter:int = 0
-var skipCounter:int = 0
 var adding:bool = false
+var _auto_counter:int = 0
+var _skip_counter:int = 0
 var _target_leng:int = 0
 var _grouping:bool = false
 var _groupSize:int = 0
@@ -17,6 +19,10 @@ var _lastUnderscoreIdx:int = 0
 var _lastPctIdx:int = 0
 var _lastSlashIdx:int = 0
 var _beep:bool = false
+var _eod:bool = false
+var _eod_num:int = 0
+var _eod_counter:int = 0
+var _finalized_text:String = ''
 
 # var eod_str:String = "[fade start=1 length=4]  >>>[/fade]"
 # var eod:bool = false
@@ -27,7 +33,6 @@ signal load_next
 signal all_visible
 
 func _ready():
-	beep_path = beep_path.split("/")[-1]
 	for f in DEFAULT_FONTS:
 		DEFAULT_FONTS[f] = get('custom_fonts/%s_font'%f)
 	
@@ -35,6 +40,7 @@ func _ready():
 	var _err:int = vn.get_node("GlobalTimer").connect("timeout",self, "_on_global_timeout")
 	_err = sb.connect("mouse_entered", vn.Utils, "no_mouse")
 	_err = sb.connect("mouse_exited", vn.Utils, "yes_mouse")
+	beep_path = beep_path.split("/")[-1]
 
 func reset_fonts():
 	for f in DEFAULT_FONTS:
@@ -52,11 +58,14 @@ func set_dialog(words:String, cps:float = vn.cps, extend:bool = false, beep:bool
 	_lastPctIdx = -1
 	_lastUnderscoreIdx = -1
 	_lastSlashIdx = -1
+	_eod = false
+	_eod_num = 0
 	_beep = beep and (beep_path != '')
 	if extend:
 		visible_characters = text.length()
-		bbcode_text += " " + words
+		bbcode_text = _finalized_text + " " + words
 	else:
+		_finalized_text = ''
 		visible_characters = 0
 		bbcode_text = words
 		
@@ -76,15 +85,12 @@ func force_finish():
 	_beep = false
 	while adding:
 		_on_Timer_timeout()
-		# visible_characters = _target_leng  # + len(eod_str)
-		#eod = true
-#		#bbcode_text += eod_str
+	_finalized_text = bbcode_text 
+	if EOD_pic != '' and EOD_pic_lengh > 1:
+		_eod = true
+
 
 func _on_Timer_timeout():
-	#if eod:
-	#	var n:String = eod_str[12]
-	#	eod_str = eod_str.replace(n,str((int(n)+1)%5))
-	#	bbcode_text = bbcode_text.substr(0,_target_leng) + eod_str
 	var delay:bool = false
 	if _grouping:
 		_groupedWord += text[visible_characters + _groupSize]
@@ -148,20 +154,34 @@ func _add_visible(delay:bool = false):
 			adding = false
 			$Timer.stop()
 			emit_signal("all_visible")
+			_finalized_text = bbcode_text 
+			if EOD_pic != '' and EOD_pic_lengh > 1:
+				_eod = true
+				visible_characters = -1
 
 func _on_global_timeout():
 	if get_parent().visible:
 		if vn.skipping:
-			skipCounter = (skipCounter + 1)%(vn.SKIP_SPEED)
-			if skipCounter == 0:
+			_skip_counter = (_skip_counter + 1)%(vn.SKIP_SPEED)
+			if _skip_counter == 0:
 				emit_signal("load_next")
 		else:
+			# EOD Behavior
+			if !adding and _eod:
+				_eod_counter += 1
+				if _eod_counter >= 2: # 2 means update per 2*0.05 seconds
+					_eod_counter = 0
+					bbcode_text = _finalized_text + " "
+					var temp:PoolStringArray = EOD_pic.split("_")
+					_eod_num = (_eod_num + 1) % EOD_pic_lengh
+					add_image(load(temp[0]+"_"+str(_eod_num)+".png"),20,20)
+			# Auto Behavior
 			if !adding and vn.auto_on and !MyUtils.has_job('auto_dialog_wait'): 
-				autoCounter += 1
-				if autoCounter >= vn.auto_time * 20:
-					autoCounter = 0
+				_auto_counter += 1
+				if _auto_counter >= vn.auto_time * 20:
+					_auto_counter = 0
 					emit_signal("load_next")
 			else:
-				autoCounter = 0
-			skipCounter = 0
+				_auto_counter = 0
+			_skip_counter = 0
 	
