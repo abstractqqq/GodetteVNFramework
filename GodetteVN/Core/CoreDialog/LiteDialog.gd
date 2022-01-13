@@ -38,8 +38,9 @@ func interpret_events(event:Dictionary):
 			else: auto_load_next()
 		2: screen_effects(ev)
 		3: 
-			.change_background(ev)
-			yield(screen, "transition_finished")
+			var need_2_yield:bool = .change_background(ev)
+			if need_2_yield:
+				yield(screen, "transition_finished")
 			auto_load_next(!vn.inLoading)
 			return
 		4: .character_event(ev)
@@ -186,7 +187,7 @@ func wait(time : float) -> void:
 		yield(get_tree().create_timer(time), "timeout")
 	auto_load_next(!vn.inLoading)
 	
-func on_choice_made(ev : Dictionary, rollback_to_choice:bool = true) -> void:
+func on_choice_made(ev : Dictionary) -> void:
 	# rollback_to_choice is only used when called externally.
 	_u.free_children(choiceContainer)
 	waiting_cho = false

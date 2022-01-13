@@ -1,5 +1,9 @@
 extends Node2D
 class_name DialogSkeleton
+# This is not the bare minimum you need to make a dialog system.
+# This is a set of general instructions that are currently
+# used in GeneralDialog class and should be reusable in other dialog systems I will
+# make in the future.
 
 # Think of this as an interface/abstract class
 
@@ -11,14 +15,18 @@ export(String, FILE, "*.tscn") var float_text = 'res://GodetteVN/Core/_Details/f
 
 # Core data
 var current_index : int = 0
-var current_block: Array
+var current_block : Array
 var current_bname:String = "starter"
 var all_blocks:Dictionary
+# Dictionary of lists, where each list is a list of events (dictionaries)
+# {"starter": [ev1, ev2,...], "branch1":[ev1, ev2,..]}
 
 # Format of choices:
 # all_choices = { "c1":[{"a": {'then':"block2"} },{"b":{'then':'block3'},{'c':{'dvar':'...'}]
 #		"c2": [... , ...]
 # }
+# You can decide the format of your choices.
+
 
 var all_choices:Dictionary
 
@@ -45,6 +53,10 @@ var one_time_font_change : bool = false
 var _propagate_dvar_list:Dictionary = {}
 #----------------------
 # Important components
+# If you put VNUI and a VNBackground as subnode, you will have all these.
+# If you are, for instance, making a cell phone dialog system, then you
+# will need to repoint these dialog variables, and maybe you do not want to use
+# VNUI.
 onready var vnui = $VNUI
 onready var cur_db:RichTextLabel = $VNUI/dialogBox/dialogBoxCore
 onready var speaker:RichTextLabel = $VNUI/nameBox/speaker
@@ -167,6 +179,8 @@ func express(combine:String):
 	return uid
 	
 #---------------------- Camera, Character, Background --------------------------
+# These are all unnecessary. But if you want to use the rich built in features,
+# for camera and characters, and background changes, you can use these functions.
 func camera_effect(ev:Dictionary):
 	var action : String = ev['camera']
 	match action:

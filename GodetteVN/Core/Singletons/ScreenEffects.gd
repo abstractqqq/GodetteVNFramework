@@ -79,14 +79,6 @@ func screen_transition(mode:String, eff_name:String,color:Color,eff_dur:float,bg
 func reset():
 	_color_panel.visible = false
 	
-#func set_debug(debug:bool, text:String=""):
-#	var debugger = get_node_or_null("debugger")
-#	if debugger:
-#		if debug == false:
-#			debugger.queue_free()
-#		else:
-#			debugger.text = text
-		
 func clean_up():
 	removeLasting()
 	MyUtils.free_children($weather)
@@ -116,17 +108,20 @@ func play_transition_full(params:Array) -> void:
 		return
 	
 	if vn.Scene:
-		vn.Scene.hide_boxes()
-		vn.Scene.QM.visible = false
+		if vn.Scene.has_meta("QM"):
+			vn.Scene.QM.visible = false
+		if vn.Scene.has_method("hide_boxes"):
+			vn.Scene.hide_boxes()
 	play_transition_in()
 	yield(self, "transition_mid_point_reached")
 	if vn.Scene:
 		vn.Scene.bg.bg_change(params[0])
 	play_transition_out()
 	if vn.Scene:
-		vn.Scene.show_boxes()
-		if not vn.Scene.QM.hiding: 
+		if vn.Scene.has_meta("QM") and not vn.Scene.QM.hiding:
 			vn.Scene.QM.visible = true
+		if vn.Scene.has_method("show_boxes"):
+			vn.Scene.show_boxes()
 
 
 func play_fade_in(params:Array) -> void:
@@ -145,17 +140,20 @@ func play_fade_full(params:Array) -> void:
 		return
 	
 	if vn.Scene:
-		vn.Scene.hide_boxes()
-		vn.Scene.QM.visible = false
+		if vn.Scene.has_meta("QM"):
+			vn.Scene.QM.visible = false
+		if vn.Scene.has_method("hide_boxes"):
+			vn.Scene.hide_boxes()
 	play_fade_in([params[0], params[1]])
+	yield(self, "transition_mid_point_reached")
 	if vn.Scene:
 		vn.Scene.bg.bg_change(params[2])
-	yield(self, "transition_mid_point_reached")
 	play_fade_out([params[0], params[1]])
 	if vn.Scene:
-		vn.Scene.show_boxes()
-		if not vn.Scene.QM.hiding: 
+		if vn.Scene.has_meta("QM") and not vn.Scene.QM.hiding:
 			vn.Scene.QM.visible = true
+		if vn.Scene.has_method("show_boxes"):
+			vn.Scene.show_boxes()
 			
 func play_pixelate_in(params:Array):
 	# 0 : duration

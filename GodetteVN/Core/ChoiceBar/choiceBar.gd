@@ -5,7 +5,7 @@ signal choice_made(event)
 var choice_action = null
 
 func setup_choice(text:String, ev:Dictionary, infer_chosen:bool=false):
-	setup_choice_event(text,ev)
+	_setup_choice_event(text,ev)
 	var cur_sc:String = vn.Pgs.currentNodePath
 	if infer_chosen and vn.Files.system_data.has(cur_sc):
 		var cur_bl:String = vn.Pgs.currentBlock
@@ -18,7 +18,7 @@ func setup_choice(text:String, ev:Dictionary, infer_chosen:bool=false):
 		if max_idx > cur_idx:
 			$text.add_color_override("default_color", vn.chosen_color)
 
-func setup_choice_event(t: String, ev: Dictionary):
+func _setup_choice_event(t: String, ev: Dictionary):
 	get_node('text').bbcode_text = "[center]" + t + "[/center]"
 	choice_action = ev
 
