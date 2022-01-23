@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://GodetteVN/Examples/investigationScene.gd" type="Script" id=1]
 [ext_resource path="res://GodetteVN/Core/VNUI.tscn" type="PackedScene" id=2]
+[ext_resource path="res://GodetteVN/Core/CharacterStage/CharacterStage.tscn" type="PackedScene" id=3]
 [ext_resource path="res://GodetteVN/Core/_Details/VNBackground.tscn" type="PackedScene" id=4]
 [ext_resource path="res://GodetteVN/ClickableObjects/clickableObject1.tscn" type="PackedScene" id=5]
 [ext_resource path="res://GodetteVN/ClickableObjects/clickableObject2.tscn" type="PackedScene" id=6]
@@ -27,5 +28,7 @@ margin_left = 122.203
 margin_top = 555.961
 margin_right = 272.203
 margin_bottom = 712.961
+
+[node name="CharacterStage" parent="." instance=ExtResource( 3 )]
 
 [node name="VNUI" parent="." instance=ExtResource( 2 )]

@@ -95,7 +95,7 @@ func fadein(time : float, expression:String=""):
 	_fading = true
 	var tween:OneShotTween = OneShotTween.new(self, "set", ["_fading", false])
 	add_child(tween)
-	_e = tween.interpolate_property(self, "modulate", Color(0,0,0,0), stage.DIM, time,
+	_e = tween.interpolate_property(self, "modulate",Color(0,0,0,0), vn.Scene.stage.DIM, time,
 		Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
 	_e = tween.start()
 	
@@ -137,7 +137,7 @@ func change_pos_2(loca:Vector2, time:float, type:String="linear", expr:String=''
 	var m:int = vn.Utils.movement_type(type)
 	_fake = FakeWalker.new()
 	_fake.position = position
-	stage.add_child(_fake)
+	vn.Scene.stage.add_child(_fake)
 	var fake_tween:OneShotTween
 	if expr == '':
 		fake_tween = OneShotTween.new(_fake,"queue_free",[])

@@ -26,7 +26,7 @@ func _ready():
 	_e = sb.connect("mouse_entered", vn.Utils, "no_mouse")
 	_e = sb.connect("mouse_exited", vn.Utils, "yes_mouse")
 
-func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name:bool = false, beep:bool=false):
+func set_dialog(uid:String, words:String, cps:float=vn.cps, suppress_name:bool=false, beep:bool=false):
 	_beep = beep and (beep_path != '')
 	if suppress_name: # if name should not be shown, as in the center case treat it as if it is the narrator
 		uid = ""
@@ -51,7 +51,7 @@ func set_dialog(uid : String, words : String, cps = vn.cps, suppress_name:bool =
 	visible_characters = text.length()
 	bbcode_text += words
 	_target_leng = text.length()
-	if cps <= 0: # finalized = text without the special escapes like \_ and \%
+	if cps <= 0.015:
 		visible_characters = -1
 		adding = false
 		return

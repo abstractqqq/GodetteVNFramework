@@ -3,9 +3,9 @@ class_name DialogSkeleton
 # This is not the bare minimum you need to make a dialog system.
 # This is a set of general instructions that are currently
 # used in GeneralDialog class and should be reusable in other dialog systems I will
-# make in the future.
+# make in the future (and universal in the system)
 
-# Think of this as an interface/abstract class
+# Think of this as an interface/abstract class.
 
 export(String, FILE, "*.json") var dialog_json 
 export(bool) var debug_mode
@@ -61,6 +61,7 @@ onready var vnui = $VNUI
 onready var cur_db:RichTextLabel = $VNUI/dialogBox/dialogBoxCore
 onready var speaker:RichTextLabel = $VNUI/nameBox/speaker
 onready var choiceContainer:Control = $VNUI/choiceContainer
+onready var stage: Node = $CharacterStage
 onready var camera:Camera2D = screen.get_node('camera')
 onready var bg:TextureRect = $VNBackground
 onready var _u:Node = MyUtils

@@ -21,7 +21,6 @@ var main_block = [
 	{'wait':2},
 	{"bg": "condo.jpg", 'sweep_down':2, 'color':Color.pink},
 	{'female':'Hello, hello,_________ %is it time for me to show up?'},
-	# {'then':'patch_0.01', 'id':1},
 	{'chara': "female fadein", "loc": "1600 600",'time':0.5, 'expr':'smile1'},
 	{'chara':'female move', 'time':3, 'loc': Vector2(500,600),'expr':'wink'},
 	{'extend': 'This is an extend statement~', 'speed':'slower'},
@@ -58,8 +57,7 @@ var main_block = [
 	{'female': 'The idea is to create Node2D as subnodes, and rename it beginning with a _ .'},
 	{'female': 'I believe that will add a lot room for customization, provided you know how to make these '+\
 	"special effects in Godot. (And don't forget to queuefree them.)"},
-	{"female": "What should I eat today?", 'choice' : 'food'},
-	{'id':0},
+	{"female": "What should I eat today?", 'choice' : 'food', "id":0},
 	{"female":"Ok, let me show you how to put an image on the side."},
 	{'side':'female_smile.png'},
 	{'female':'Lastly, I want show you how to use centered text!'},
@@ -79,6 +77,7 @@ var main_block = [
 	{"female": "Okay, thank you so much for bearing with me!"},
 	{"screen":"fade out", 'time':2},
 	{'bgm': ''},
+	{'wait':2},
 	{"GDscene": vn.ending_scene_path}
 	
 	# end of content
@@ -91,19 +90,13 @@ var block2 = [
 	{'then' : 'starter', 'target id' : 0}
 ]
 
-var patch = [
-	
-	{"female" : 'This is the content of the new patch.'},
-	{'then' : 'starter', 'target id' : 1}
-	
-]
 
 
 #---------------------------------------------------------------------
 # If you change the key word 'starter', you will have to go to generalDialog.gd
 # and find start_scene, under if == 'new_game', change to blocks['starter'].
 # Other key word you can change at will as long as you're refering to them correctly.
-var dialog_blocks = {'starter' : main_block, 'block2' : block2, 'patch_0.01':patch}
+var dialog_blocks = {'starter' : main_block, 'block2' : block2}
 
 var choice_blocks = {'food': food_choices}
 

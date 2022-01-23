@@ -1,8 +1,22 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=15 format=2]
 
-[ext_resource path="res://GodetteVN/Core/_Details/VNBackground.tscn" type="PackedScene" id=1]
-[ext_resource path="res://GodetteVN/Core/VNUI.tscn" type="PackedScene" id=2]
+[ext_resource path="res://fonts/DEFAULT_BOLD.tres" type="DynamicFont" id=1]
+[ext_resource path="res://fonts/DEFAULT_ITALICS.tres" type="DynamicFont" id=2]
 [ext_resource path="res://GodetteVN/Dialog.gd" type="Script" id=3]
+[ext_resource path="res://fonts/DEFAULT_NORMAL.tres" type="DynamicFont" id=4]
+[ext_resource path="res://fonts/ArchitectsDaughter.ttf" type="DynamicFontData" id=5]
+[ext_resource path="res://GodetteVN/Core/VNUIBoxes/defaultDialogBox.gd" type="Script" id=6]
+[ext_resource path="res://GodetteVN/Core/VNUIBoxes/dialogBoxCore.gd" type="Script" id=7]
+[ext_resource path="res://GodetteVN/Core/_Details/VNBackground.gd" type="Script" id=8]
+[ext_resource path="res://GodetteVN/Core/_Details/choiceContainer.gd" type="Script" id=9]
+[ext_resource path="res://GodetteVN/Core/VNUI.gd" type="Script" id=10]
+[ext_resource path="res://GodetteVN/Core/_Details/HelperClasses/VNTextButton.gd" type="Script" id=11]
+[ext_resource path="res://GodetteVN/Core/QuickMenu/quickMenuLayer.gd" type="Script" id=12]
+[ext_resource path="res://GodetteVN/Core/CharacterStage/CharacterStage.gd" type="Script" id=13]
+
+[sub_resource type="DynamicFont" id=1]
+size = 28
+font_data = ExtResource( 5 )
 
 [node name="Dialog" type="Node2D"]
 script = ExtResource( 3 )
@@ -10,6 +24,267 @@ dialog_json = "res://VNScript/test.json"
 choice_bar = "res://GodetteVN/fundamentals/choiceBar.tscn"
 float_text = "res://GodetteVN/fundamentals/details/floatText.tscn"
 
-[node name="VNBackground" parent="." instance=ExtResource( 1 )]
+[node name="VNBackground" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 8 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
-[node name="VNUI" parent="." instance=ExtResource( 2 )]
+[node name="CharacterStage" type="Node2D" parent="."]
+script = ExtResource( 13 )
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="other" type="Node2D" parent="CharacterStage"]
+
+[node name="sideImage" type="Sprite" parent="CharacterStage/other"]
+position = Vector2( -35, 530 )
+z_index = 1
+centered = false
+
+[node name="characters" type="Node2D" parent="CharacterStage"]
+
+[node name="VNUI" type="CanvasLayer" parent="."]
+layer = 3
+script = ExtResource( 10 )
+
+[node name="dialogBox" type="ColorRect" parent="VNUI"]
+margin_left = 412.0
+margin_top = 832.0
+margin_right = 1509.0
+margin_bottom = 1007.0
+color = Color( 0.0745098, 0.0666667, 0.0666667, 0.627451 )
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="resizeHandler" type="Control" parent="VNUI/dialogBox"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -20.1306
+margin_top = 1.12244
+margin_right = -2.13062
+margin_bottom = 17.1224
+mouse_default_cursor_shape = 11
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="dialogBoxCore" type="RichTextLabel" parent="VNUI/dialogBox"]
+margin_left = 16.0
+margin_top = 9.0
+margin_right = 1047.0
+margin_bottom = 178.0
+rect_min_size = Vector2( 854, 138 )
+mouse_filter = 1
+custom_colors/default_color = Color( 0.74902, 0.74902, 0.74902, 1 )
+custom_fonts/italics_font = ExtResource( 2 )
+custom_fonts/bold_font = ExtResource( 1 )
+custom_fonts/normal_font = ExtResource( 4 )
+bbcode_enabled = true
+scroll_following = true
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+beep_path = "res://voice/bleep001.ogg"
+EOD_pic = "res://gui/EOD/progress_0.png"
+
+[node name="Timer" type="Timer" parent="VNUI/dialogBox/dialogBoxCore"]
+
+[node name="nameBox" type="ColorRect" parent="VNUI"]
+margin_left = 413.0
+margin_top = 767.0
+margin_right = 563.0
+margin_bottom = 810.0
+rect_min_size = Vector2( 150, 40 )
+color = Color( 0.0745098, 0.0666667, 0.0666667, 0.627451 )
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="speaker" type="RichTextLabel" parent="VNUI/nameBox"]
+margin_left = 7.0
+margin_top = -1.0
+margin_right = 141.0
+margin_bottom = 38.0
+custom_colors/default_color = Color( 0, 0, 0, 1 )
+custom_fonts/normal_font = ExtResource( 4 )
+bbcode_enabled = true
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="choiceContainer" type="VBoxContainer" parent="VNUI"]
+visible = false
+anchor_left = 0.25
+anchor_right = 0.269
+margin_left = -70.0
+margin_top = 30.0
+margin_right = 993.52
+margin_bottom = 830.0
+rect_min_size = Vector2( 1100, 800 )
+custom_constants/separation = 5
+alignment = 1
+script = ExtResource( 9 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="quickMenu" type="Node2D" parent="VNUI"]
+script = ExtResource( 12 )
+
+[node name="skipButton" type="Button" parent="VNUI/quickMenu"]
+margin_left = 650.0
+margin_top = 1020.0
+margin_right = 717.0
+margin_bottom = 1066.0
+focus_mode = 0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+shortcut_in_tooltip = false
+text = "Skip"
+flat = true
+script = ExtResource( 11 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="autoButton" type="Button" parent="VNUI/quickMenu"]
+margin_left = 720.0
+margin_top = 1020.0
+margin_right = 791.0
+margin_bottom = 1066.0
+focus_mode = 0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = SubResource( 1 )
+shortcut_in_tooltip = false
+text = "Auto"
+flat = true
+script = ExtResource( 11 )
+
+[node name="SettingButton" type="Button" parent="VNUI/quickMenu"]
+margin_left = 1139.58
+margin_top = 1019.11
+margin_right = 1238.58
+margin_bottom = 1065.11
+focus_mode = 0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 0.160784, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+shortcut_in_tooltip = false
+text = "Setting"
+flat = true
+script = ExtResource( 11 )
+
+[node name="loadButton" type="Button" parent="VNUI/quickMenu"]
+margin_left = 880.0
+margin_top = 1020.0
+margin_right = 955.0
+margin_bottom = 1066.0
+focus_mode = 0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 0.160784, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+shortcut_in_tooltip = false
+text = "Load"
+flat = true
+script = ExtResource( 11 )
+
+[node name="QsaveButton" type="Button" parent="VNUI/quickMenu"]
+margin_left = 965.707
+margin_top = 1019.93
+margin_right = 1063.71
+margin_bottom = 1065.93
+focus_mode = 0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 0.160784, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+shortcut_in_tooltip = false
+text = "Q.Save"
+flat = true
+script = ExtResource( 11 )
+
+[node name="saveButton" type="Button" parent="VNUI/quickMenu"]
+margin_left = 800.0
+margin_top = 1020.82
+margin_right = 874.0
+margin_bottom = 1066.82
+focus_mode = 0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 0.160784, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+shortcut_in_tooltip = false
+text = "Save"
+flat = true
+script = ExtResource( 11 )
+
+[node name="historyButton" type="Button" parent="VNUI/quickMenu"]
+margin_left = 1069.58
+margin_top = 1020.03
+margin_right = 1131.58
+margin_bottom = 1066.03
+focus_mode = 0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 0.160784, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+shortcut_in_tooltip = false
+text = "Hist."
+flat = true
+script = ExtResource( 11 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="mainButton" type="Button" parent="VNUI/quickMenu"]
+margin_left = 1249.58
+margin_top = 1019.59
+margin_right = 1316.58
+margin_bottom = 1065.59
+focus_mode = 0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 0.160784, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+shortcut_in_tooltip = false
+text = "Main"
+flat = true
+script = ExtResource( 11 )
+
+[node name="quitButton" type="Button" parent="VNUI/quickMenu"]
+visible = false
+margin_left = 900.0
+margin_top = 1020.0
+margin_right = 961.0
+margin_bottom = 1066.0
+focus_mode = 0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_hover = Color( 0.160784, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+shortcut_in_tooltip = false
+text = "Quit"
+flat = true
+script = ExtResource( 11 )
+
+[connection signal="gui_input" from="VNUI/dialogBox" to="VNUI/dialogBox" method="_on_dialogBox_gui_input"]
+[connection signal="mouse_entered" from="VNUI/dialogBox" to="VNUI/dialogBox" method="_on_dialogBox_mouse_entered"]
+[connection signal="mouse_exited" from="VNUI/dialogBox" to="VNUI/dialogBox" method="_on_dialogBox_mouse_exited"]
+[connection signal="gui_input" from="VNUI/dialogBox/resizeHandler" to="VNUI/dialogBox" method="_on_resizeHandler_gui_input"]
+[connection signal="mouse_entered" from="VNUI/dialogBox/resizeHandler" to="VNUI/dialogBox" method="_on_resizeHandler_mouse_entered"]
+[connection signal="mouse_exited" from="VNUI/dialogBox/resizeHandler" to="VNUI/dialogBox" method="_on_resizeHandler_mouse_exited"]
+[connection signal="timeout" from="VNUI/dialogBox/dialogBoxCore/Timer" to="VNUI/dialogBox/dialogBoxCore" method="_on_Timer_timeout"]
+[connection signal="pressed" from="VNUI/quickMenu/skipButton" to="VNUI/quickMenu" method="_on_skipButton_pressed"]
+[connection signal="pressed" from="VNUI/quickMenu/autoButton" to="VNUI/quickMenu" method="_on_autoButton_pressed"]
+[connection signal="pressed" from="VNUI/quickMenu/SettingButton" to="VNUI/quickMenu" method="_on_SettingButton_pressed"]
+[connection signal="pressed" from="VNUI/quickMenu/loadButton" to="VNUI/quickMenu" method="_on_loadButton_pressed"]
+[connection signal="pressed" from="VNUI/quickMenu/QsaveButton" to="VNUI/quickMenu" method="_on_QsaveButton_pressed"]
+[connection signal="pressed" from="VNUI/quickMenu/saveButton" to="VNUI/quickMenu" method="_on_saveButton_pressed"]
+[connection signal="pressed" from="VNUI/quickMenu/historyButton" to="VNUI/quickMenu" method="on_historyButton_pressed"]
+[connection signal="pressed" from="VNUI/quickMenu/mainButton" to="VNUI/quickMenu" method="_on_mainButton_pressed"]
+[connection signal="pressed" from="VNUI/quickMenu/quitButton" to="VNUI/quickMenu" method="_on_quitButton_pressed"]

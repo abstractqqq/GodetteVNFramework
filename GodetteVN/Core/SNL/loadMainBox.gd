@@ -21,5 +21,5 @@ func _ready():
 
 func load_save():
 	vn.reset_states() # inSetting = false
-	stage.character_leave('absolute_all')
-	var _e = get_tree().change_scene(vn.Pgs.currentNodePath)
+	vn.Scene.stage.character_leave('absolute_all')
+	var _e:bool = get_tree().change_scene(vn.Pgs.currentNodePath)

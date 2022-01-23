@@ -23,8 +23,8 @@ func get_dialog_box():
 	return dbox
 
 func namebox_follow_chara(uid:String):
-	if name_box_follow_chara and stage.is_on_stage(uid):
-		var cpos:Vector2 = stage.get_chara_pos(uid)
+	if name_box_follow_chara and vn.Scene.stage.is_on_stage(uid):
+		var cpos:Vector2 = vn.Scene.stage.get_chara_pos(uid)
 		var mid:float = get_viewport().size.x / 2.0
 		if cpos.x < mid:
 			$nameBox.rect_position.x = $dialogBox.rect_position.x
@@ -42,4 +42,8 @@ func set_dialog_box_options(draggable:bool=false, resizable:bool=false):
 	$dialogBox.draggable = draggable
 	if resizable == false:
 		$dialogBox.hide_resize_handler()
+
+func set_side_image(sc:Vector2 = Vector2(1,1), pos:Vector2 = Vector2(-35,530)):
+	$other/sideImage.scale = sc
+	$other/sideImage.position = pos
 

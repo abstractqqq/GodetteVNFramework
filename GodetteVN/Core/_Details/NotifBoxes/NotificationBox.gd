@@ -1,6 +1,5 @@
 extends TextureRect
 
-
 var type : String
 
 var following:bool = false
@@ -12,7 +11,7 @@ signal decision(yes)
 signal clicked
 
 
-func _on_notifBox_gui_input(event):
+func _on_notifBox_gui_input(event:InputEvent):
 	if event is InputEventMouseButton:
 		if event.get_button_index() == 1:
 			following = !following
@@ -55,7 +54,7 @@ func _on_yesButton_pressed():
 			vn.Pgs.resetPlayback()
 			vn.Pgs.history.clear()
 			vn.dvar_initialization()
-			stage.clean_up()
+			vn.Scene.stage.clean_up()
 			if get_tree().change_scene(vn.ROOT_DIR + vn.title_screen_path) == OK:
 				vn.reset_states()
 		"override":

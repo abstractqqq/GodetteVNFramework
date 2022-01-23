@@ -1,4 +1,4 @@
-extends Node
+extends Node2D
 
 # Applies highlight/scale to talking characters
 export(bool) var apply_highlight = true
@@ -23,10 +23,6 @@ func get_character_info(uid:String):
 		return vn.Chs.all_chara[uid]
 	else:
 		push_error("No character with this uid {0} is found".format({0:uid}))
-
-func set_sideImage(sc:Vector2 = Vector2(1,1), pos:Vector2 = Vector2(-35,530)):
-	$other/sideImage.scale = sc
-	$other/sideImage.position = pos
 	
 func change_expression(uid:String, expr:String):
 	var info:Dictionary = vn.Chs.all_chara[uid]
@@ -246,7 +242,6 @@ func set_flip(uid:String, fliph:bool=false, flipv:bool=false):
 	
 func clean_up():
 	character_leave("absolute_all")
-	set_sideImage()
 
 # remove characters whose uid is not in arr
 func remove_not_in(arr:PoolStringArray):

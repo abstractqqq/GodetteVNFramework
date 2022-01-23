@@ -32,14 +32,14 @@ var playback_events:Dictionary = {'bg':'', 'bgm':{'bgm':''}, 'charas':[], 'nvl':
 	,'speech':'', 'control_state': control_state}
 
 func get_latest_onstage():
-	playback_events['charas'] = stage.all_on_stage()
+	playback_events['charas'] = vn.Scene.stage.all_on_stage()
 
 func get_latest_nvl():
 	playback_events['nvl'] = nvl_text
 
 func update_playback():
 	playback_events['nvl'] = nvl_text
-	playback_events['charas'] = stage.all_on_stage()
+	playback_events['charas'] = vn.Scene.stage.all_on_stage()
 
 #-------------------------------------------------------------------------------
 # "new_game" = start from new

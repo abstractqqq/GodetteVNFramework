@@ -5,7 +5,6 @@
 
 [node name="female" type="AnimatedSprite"]
 modulate = Color( 0.862745, 0.862745, 0.862745, 1 )
-z_index = 1
 frames = ExtResource( 1 )
 script = ExtResource( 2 )
 display_name = "A"

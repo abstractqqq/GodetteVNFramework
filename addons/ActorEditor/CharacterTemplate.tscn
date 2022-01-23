@@ -4,5 +4,4 @@
 
 [node name="character" type="AnimatedSprite"]
 modulate = Color( 0.862745, 0.862745, 0.862745, 1 )
-z_index = 1
 script = ExtResource( 1 )

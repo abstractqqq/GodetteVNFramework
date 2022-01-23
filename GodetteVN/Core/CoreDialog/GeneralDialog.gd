@@ -65,7 +65,7 @@ func interpret_events(event:Dictionary):
 			interpret_events(vn.Utils.call_premade_events(ev['premade']))
 			return
 		15: system(ev)
-		16: sideImageChange(ev)
+		16: side_image_change(ev)
 		17: generate_choices(ev)
 		18: wait(ev['wait'])
 		19: set_nvl(ev)
@@ -101,11 +101,9 @@ func auto_load_next(forw:bool=true):
 			if not vn.Pgs.checkSkippable():
 				QM.reset_skip()
 		load_event_at_index(current_index)
-		
-
 
 #------------------------------- NVL Dialog ------------------------------
-func set_nvl(ev:Dictionary):
+func set_nvl(ev:Dictionary, auto_forw:bool=true):
 	if typeof(ev['nvl']) == TYPE_BOOL:
 		if ev['nvl']:
 			nvl_on(_u.has_or_default(ev,'font',''))
@@ -117,14 +115,14 @@ func set_nvl(ev:Dictionary):
 	else:
 		print("!!! Wrong nvl event format : %s" %ev)
 		push_error('nvl expects a boolean or the keyword clear.')
-	auto_load_next(!vn.inLoading)
+	auto_load_next(auto_forw and !vn.inLoading)
 	
 func set_center(ev:Dictionary):
 	self.centered = true
 	if ev.has('font'):
-		set_nvl({'nvl': true,'font':ev['font']})
+		set_nvl({'nvl': true,'font':ev['font']}, false)
 	else:
-		set_nvl({'nvl': true})
+		set_nvl({'nvl': true}, false)
 	var _has_voice:bool = _check_voice(ev)
 	say(_u.has_or_default(ev,"who",""), ev['center'],
 		_parse_speed(_u.has_or_default(ev,'speed', vn.cps)),
@@ -157,7 +155,6 @@ func nvl_on(font:String=''):
 		dimming(stage.NVL_DIM)
 		
 #-------------------------------- ADV Dialog -----------------------------------
-
 func generate_choices(ev:Dictionary):
 	# make a say event
 	if self.nvl: nvl_off()
@@ -230,7 +227,8 @@ func say(uid:String, words:String, cps:float=vn.cps, args:Dictionary={}):
 			cur_db.set_dialog(words, cps, false, use_beep)
 		
 		stage.set_focus(uid)
-	wait_for_accept(args['wait'])
+	if not args['ques']: # Not a question, enter wait mode.
+		wait_for_accept(args['wait'])
 
 func extend(ev:Dictionary):
 	# Cannot use extend with a choice, extend doesn't support font
@@ -258,8 +256,8 @@ func extend(ev:Dictionary):
 			vn.Pgs.history.pop_back()
 		else:
 			cur_db.bbcode_text = vn.Pgs.playback_events['speech']
-			cur_db.set_dialog(words, cps, true, use_beep)
 			vn.Pgs.playback_events['speech'] += " " + t
+			cur_db.set_dialog(words, cps, true, use_beep)
 			
 		stage.set_focus(prev_speaker)
 		# wait for accept
@@ -315,10 +313,7 @@ func on_choice_made(ev : Dictionary, rollback_to_choice:bool = true) -> void:
 			vn.Pgs.rollback_records.clear()
 	waiting_cho = false
 	choiceContainer.visible = false
-	if ev.size() == 0:
-		auto_load_next()
-	else:
-		interpret_events(ev)
+	interpret_events(ev)
 
 func on_rollback(): # First prepare to rollback... ...
 	QM.reset_auto_skip()
@@ -331,7 +326,7 @@ func on_rollback(): # First prepare to rollback... ...
 		else:
 			vn.Pgs.history.pop_back()
 		screen.clean_up()
-		stage.set_sideImage()
+		vnui.set_side_image()
 		camera.camera_reset()
 		waiting_cho = false
 		nvl_off()
@@ -374,7 +369,7 @@ func load_playback(play_back:Dictionary, RBM:bool = false): # Roll Back Mode
 	if play_back.has('weather'):
 		change_weather(play_back['weather']['weather'])
 	if play_back.has('side'):
-		sideImageChange(play_back['side'])
+		side_image_change(play_back['side'])
 		
 	var ctrl_state:Dictionary = play_back['control_state']
 	for k in ctrl_state:
@@ -497,17 +492,18 @@ func then(ev:Dictionary) -> void:
 			vn.Files.system_data[dialog_json][current_bname] = current_index
 	.then(ev)
 
-func sideImageChange(ev:Dictionary):
+func side_image_change(ev:Dictionary):
 	var path:String = ev['side']
-	var sideImage:Sprite = stage.get_node('other/sideImage')
+	var sideImage:Sprite = vnui.get_node('other/sideImage')
 	if path == "":
 		sideImage.texture = null
 		vn.Pgs.playback_events.erase('side')
 	else:
 		sideImage.texture = load(vn.SIDE_IMAGE+path)
 		vn.Pgs.playback_events['side'] = ev
-		stage.set_sideImage(_u.has_or_default(ev,'scale',Vector2(1,1)),\
+		vnui.set_side_image(_u.has_or_default(ev,'scale',Vector2(1,1)),\
 			_u.has_or_default(ev,'loc',Vector2(-35, 530)))
+	auto_load_next(!vn.inLoading)
 
 func flt_text(ev: Dictionary) -> void:
 	var wt:float = ev['wait']
@@ -657,6 +653,7 @@ func system(ev : Dictionary):
 #------------------------------- Change Godot Scene -----------------------------
 func change_scene_to(path : String):
 	stage.clean_up()
+	vnui.set_side_image()
 	change_weather('')
 	QM.reset_auto_skip()
 	print("You are changing scene. Rollback will be cleared. It's a good idea to explain "+\

@@ -63,7 +63,7 @@ func set_dialog(words:String, cps:float = vn.cps, extend:bool = false, beep:bool
 	_beep = beep and (beep_path != '')
 	if extend:
 		visible_characters = text.length()
-		bbcode_text = _finalized_text + " " + words
+		bbcode_text = vn.Pgs.playback_events['speech'] # + " " + words
 	else:
 		_finalized_text = ''
 		visible_characters = 0

@@ -58,9 +58,6 @@ func calculate(what:String):
 # creates an after image. Used for fadeout effects / other fancy effects
 
 func after_image(pos:Vector2, scale:Vector2, m:Color, fliph:bool, flipv:bool, deg:float, texture:Texture, ft:float,z:int,to_free:Node=null):
-	if to_free: # if a to_free node is give, this node will be freed. Used in character fadeout.
-		to_free.call_deferred('free')
-	
 	var dummy:Sprite = Sprite.new()
 	dummy.z_index = z+1
 	dummy.name = "_dummy"
@@ -71,12 +68,15 @@ func after_image(pos:Vector2, scale:Vector2, m:Color, fliph:bool, flipv:bool, de
 	dummy.flip_v = flipv
 	dummy.modulate = m
 	dummy.rotation_degrees = deg
-	stage.add_child(dummy)
+	vn.Scene.stage.add_child(dummy)
 	var tween:OneShotTween = OneShotTween.new(dummy, "queue_free")
 	dummy.add_child(tween)
-	var _e:int = tween.interpolate_property(dummy, "modulate", m, Color(m.r, m.g, m.b, 0), ft,
+	var _e:int = tween.interpolate_property(dummy, ":modulate:a", m.a, 0.0, ft,
 		Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
 	_e = tween.start()
+	#
+	if to_free: # if a to_free node is give, this node will be freed. Used in character fadeout.
+		to_free.call_deferred('free')
 
 #----------------------------------------------------------------------
 # Make a save.

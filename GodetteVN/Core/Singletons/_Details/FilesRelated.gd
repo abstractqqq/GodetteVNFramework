@@ -40,6 +40,9 @@ func readSave(save) -> bool:
 	var file:File = File.new()
 	if file.open_encrypted_with_pass(save.path, File.READ, vn.PASSWORD) == OK:
 		var data = file.get_var()
+		#if vn.GAME_VERSION != data['GAME_VERSION']:
+		# Do your thing...
+		#	pass
 		vn.Pgs.currentSaveDesc = data['currentSaveDesc']
 		vn.Pgs.currentIndex = data['currentIndex']
 		vn.Pgs.currentNodePath = data['currentNodePath']
