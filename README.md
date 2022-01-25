@@ -1,6 +1,6 @@
 # GodetteVN, A Visual Novel Framework for Godot Users
 
-## I am focusing on making a game with this rn. No update planned unless it's a bug.
+## MOVING TO GODOT4. I made so many embrassing mistakes when it comes to tweens in this version... ... 
 
 ![Godette](/Showcases/show1.png)
 
