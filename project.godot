@@ -105,10 +105,10 @@ config/icon="res://godette.png"
 
 [autoload]
 
-vn="*res://GodetteVN/Core/Singletons/vn.tscn"
-music="*res://GodetteVN/Core/Singletons/MusicController.tscn"
-screen="*res://GodetteVN/Core/Singletons/ScreenEffects.tscn"
-MyUtils="*res://GodetteVN/Core/Singletons/utils.tscn"
+vn="*res://Singletons/vn.tscn"
+music="*res://Singletons/MusicController.tscn"
+screen="*res://Singletons/ScreenEffects.tscn"
+MyUtils="*res://Singletons/utils.tscn"
 
 [display]
 

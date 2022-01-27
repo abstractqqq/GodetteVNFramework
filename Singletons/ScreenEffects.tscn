@@ -1,7 +1,7 @@
 [gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://GodetteVN/Core/_Details/Weathers/weather.tscn" type="PackedScene" id=1]
-[ext_resource path="res://GodetteVN/Core/Singletons/ScreenEffects.gd" type="Script" id=2]
+[ext_resource path="res://Singletons/ScreenEffects.gd" type="Script" id=2]
 [ext_resource path="res://GodetteVN/Shaders/transition.shader" type="Shader" id=3]
 [ext_resource path="res://GodetteVN/Core/_Details/camera.tscn" type="PackedScene" id=4]
 
