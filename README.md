@@ -1,6 +1,8 @@
-# GodetteVN, A Visual Novel Framework for Godot Users
 
-## MOVING TO GODOT4. I made so many embrassing mistakes when it comes to tweens in this version... ... 
+
+# GodetteVN, A Visual Novel Framework on GD3. Not really updated anymore.
+
+## MOVING TO GODOT4. I made so many newbie mistakes when designing this version. Will be remaking it in GD4, but most likely won't include rollback. 
 
 ![Godette](/Showcases/show1.png)
 
